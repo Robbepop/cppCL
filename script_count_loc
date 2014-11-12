@@ -1,0 +1,2 @@
+find . -name '*.cpp' -o -name '*.xml' | grep -v '\.svn' | xargs wc -l
+find . -name '*.hpp' -o -name '*.xml' | grep -v '\.svn' | xargs wc -l

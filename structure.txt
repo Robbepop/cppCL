@@ -1,0 +1,179 @@
+CLPlatform
+- ctor (id)
+- getPlatforms : static
+- getDevices
+- getInfo (...)
+
+CLObject
+- getInfo
+- getInfoVector
+- getInfoString
+- retain
+- release
+
+	CLDevice : CLObject
+	- ctor (id)
+	- getInfo (...)
+	- createSubDevice
+	- retain
+	- release
+
+	CLContext : CLObject
+	- ctor (complex, 2 versions)
+	- getInfo (...)
+	- retain
+	- release
+
+	CLCommandQueue : CLObject
+	- ctor (?)
+	- getInfo (...)
+	- enqueueNDRangeKernel
+	- enqueueTask
+	- enqueueNativeKernel
+	- enqueueMarkerWithWaitList
+	- enqueueBarrierWithWaitList
+	- flush
+	- finish
+	- retain
+	- release
+
+	CLSampler : CLObject
+	- ctor (?)
+	- getInfo (...)
+	- retain
+	- release
+
+	CLProgram : CLObject
+	- ctor (complex: source, binary, built-in-kernels)
+	- getInfo (...)
+	- getBuildInfo (...)
+	- compile
+	- link
+	- build
+	- unloadPlatformCompiler
+	- retain
+	- release
+
+	CLKernel : CLObject
+	- ctor (complex: ?, inProgram)
+	- getInfo (...)
+	- getWorkGroupInfo (...)
+	- setArg
+	- setArgs
+	- retain
+	- release
+
+	CLEvent : CLObject
+	- ctor (complex: userEvent)
+	- getInfo (...)
+	- getProfilingInfo (...)
+	- waitForEvents
+	- setUserEventStatus
+	- setCallback
+	- retain
+	- release
+
+	CLMemoryObject (abstract class) : CLObject
+	- ctor (id)
+	- enqueueUnmap
+	- enqueueMigrate
+	- setDestructorCallback
+	- getInfo (...)
+	- enqueueRead : virtual
+	- enqueueWrite : virtual
+	- enqueueFill : virutal
+	- enqueueCopy : virtual
+	- retain
+	- release
+
+		CLBuffer : CLMemoryObject
+		- ctor (?)
+		- createSubBuffer
+		- enqueueRead : override
+		- enqueueWrite : override
+		- enqueueReadRect
+		- enqueueWriteRect
+		- enqueueFill : override
+		- enqueueCopy : override
+		- enqueueCopyRect
+		- enqueueMap
+
+		CLImage : CLMemoryObject
+		- ctor (?)
+		- getSupportedFormats
+		- enqueueRead : override
+		- enqueueWrite : override
+		- enqueueFill : override
+		- enqueueCopy : override
+		- enqueueCopyToBuffer
+		- enqueueCopyFromBuffer
+		- enqueueMap
+		- getInfo (...)
+
+
+
+
+Buffer:                                             Image:
+clCreateBuffer                                      clCreateImage (2D/3D)
+clCreateSubBuffer                                   
+clEnqueueFillBuffer                                 clEnqueueFillImage
+clEnqueueReadBuffer                                 clEnqueueReadImage
+clEnqueueWriteBuffer                                clEnqueueWriteImage
+clEnqueueReadBufferRect                             
+clEnqueueWriteBufferRect
+clGetMemObjectInfo                                  clGetImageInfo
+                                                    clGetSupportedImageFormats
+clEnqueueCopyBuffer                                 clEnqueueCopyImage
+clEnqueueCopyBufferRect                             
+clEnqueueCopyBufferToImage                          clEnqueueCopyImageToBuffer
+
+
+Mem Object:
+	clEnqueueMigrateMemObjects
+	clRetainMemObject
+	clReleaseMemObject
+	clSetMemObjectDestructorCallback
+	clEnqueueUnmapMemObject
+
+	virt:
+		enqueueFill
+		enqueueRead
+		enqueueWrite
+		enqueueCopy
+		getInfo
+
+v1.1
+    clCreateImage2D
+    clCreateImage3D
+
+v1.2
+	clCreateImage
+	clEnqueueFillBuffer
+	clEnqueueFillImage
+	clEnqueueMigrateMemObjects
+
+both:
+    clCreateBuffer
+    clCreateSubBuffer
+    clEnqueueReadBuffer
+    clEnqueueWriteBuffer
+    clEnqueueReadBufferRect
+	clEnqueueWriteBufferRect
+	clRetainMemObject
+	clReleaseMemObject
+	clSetMemObjectDestructorCallback
+    clGetMemObjectInfo
+	clGetImageInfo
+	clGetSupportedImageFormats
+    clEnqueueCopyBuffer
+    clEnqueueCopyBufferRect
+    clEnqueueCopyBufferToImage
+    clEnqueueReadImage
+	clEnqueueWriteImage
+    clEnqueueCopyImage
+    clEnqueueCopyImageToBuffer
+    clEnqueueMapBuffer
+    clEnqueueMapImage
+    clEnqueueUnmapMemObject
+    cl_image_format
+

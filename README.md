@@ -1,9 +1,5 @@
-cpp_opencl_wrapper
-==================
-
-
-Welcome
-=======
+Welcome to cppCL (C++ OpenCL)
+=============================
 
 **cppCL** is an object-oriented wrapper for the [OpenCL](http://www.khronos.org/opencl/) C API written in modern C++.
 

@@ -15,69 +15,69 @@ LFLAGS = ${GFLAGS} ${LIB} ${INC} ${DEBUG}
 main : ${OBJS}
 	$(CC) $(LFLAGS) $(OBJS) -o main
 
-main.o : main.cpp src/wrapper.hpp src/error_handler.hpp src/exception.hpp
+main.o : main.cpp cppcl/wrapper.hpp cppcl/error_handler.hpp cppcl/exception.hpp
 	$(CC) $(CFLAGS) main.cpp
 
-common.o : src/common.hpp src/common.cpp
-	$(CC) $(CFLAGS) src/common.cpp
+common.o : cppcl/common.hpp cppcl/common.cpp
+	$(CC) $(CFLAGS) cppcl/common.cpp
 
-wrapper.o : src/wrapper.hpp src/wrapper.cpp
-	$(CC) $(CFLAGS) src/wrapper.cpp
+wrapper.o : cppcl/wrapper.hpp cppcl/wrapper.cpp
+	$(CC) $(CFLAGS) cppcl/wrapper.cpp
 
-object.o : src/object.hpp src/object.cpp src/wrapper.hpp 
-	$(CC) $(CFLAGS) src/object.cpp
+object.o : cppcl/object.hpp cppcl/object.cpp cppcl/wrapper.hpp 
+	$(CC) $(CFLAGS) cppcl/object.cpp
 
-platform.o : src/platform.hpp src/platform.cpp src/object.hpp src/common.hpp
-	$(CC) $(CFLAGS) src/platform.cpp
+platform.o : cppcl/platform.hpp cppcl/platform.cpp cppcl/object.hpp cppcl/common.hpp
+	$(CC) $(CFLAGS) cppcl/platform.cpp
 
-device.o : src/device.hpp src/device.cpp src/object.hpp src/fpconfig.hpp \
-		   src/execution_capabilities.hpp src/command_queue_properties.hpp
-	$(CC) $(CFLAGS) src/device.cpp
+device.o : cppcl/device.hpp cppcl/device.cpp cppcl/object.hpp cppcl/fpconfig.hpp \
+		   cppcl/execution_capabilities.hpp cppcl/command_queue_properties.hpp
+	$(CC) $(CFLAGS) cppcl/device.cpp
 
-context.o : src/context.hpp src/context.cpp src/object.hpp src/context_properties.hpp
-	$(CC) $(CFLAGS) src/context.cpp
+context.o : cppcl/context.hpp cppcl/context.cpp cppcl/object.hpp cppcl/context_properties.hpp
+	$(CC) $(CFLAGS) cppcl/context.cpp
 
-fpconfig.o : src/fpconfig.hpp src/fpconfig.cpp
-	$(CC) $(CFLAGS) src/fpconfig.cpp
+fpconfig.o : cppcl/fpconfig.hpp cppcl/fpconfig.cpp
+	$(CC) $(CFLAGS) cppcl/fpconfig.cpp
 
-execution_capabilities.o : src/execution_capabilities.hpp src/execution_capabilities.cpp
-	$(CC) $(CFLAGS) src/execution_capabilities.cpp
+execution_capabilities.o : cppcl/execution_capabilities.hpp cppcl/execution_capabilities.cpp
+	$(CC) $(CFLAGS) cppcl/execution_capabilities.cpp
 
-command_queue_properties.o : src/command_queue_properties.hpp src/command_queue_properties.cpp
-	$(CC) $(CFLAGS) src/command_queue_properties.cpp
+command_queue_properties.o : cppcl/command_queue_properties.hpp cppcl/command_queue_properties.cpp
+	$(CC) $(CFLAGS) cppcl/command_queue_properties.cpp
 
-context_properties.o : src/context_properties.hpp src/context_properties.cpp
-	$(CC) $(CFLAGS) src/context_properties.cpp
+context_properties.o : cppcl/context_properties.hpp cppcl/context_properties.cpp
+	$(CC) $(CFLAGS) cppcl/context_properties.cpp
 
-exception.o : src/exception.hpp src/exception.cpp
-	$(CC) $(CFLAGS) src/exception.cpp
+exception.o : cppcl/exception.hpp cppcl/exception.cpp
+	$(CC) $(CFLAGS) cppcl/exception.cpp
 
-error_handler.o : src/error_handler.hpp src/error_handler.cpp src/exception.hpp
-	$(CC) $(CFLAGS) src/error_handler.cpp
+error_handler.o : cppcl/error_handler.hpp cppcl/error_handler.cpp cppcl/exception.hpp
+	$(CC) $(CFLAGS) cppcl/error_handler.cpp
 
-command_queue.o : src/command_queue.hpp src/command_queue.cpp src/object.hpp src/error_handler.hpp \
-				  src/command_queue_properties.hpp src/event.hpp src/buffer.hpp src/image.hpp \
-				  src/map_buffer_flags.hpp src/mapped_buffer.hpp
-	$(CC) $(CFLAGS) src/command_queue.cpp
+command_queue.o : cppcl/command_queue.hpp cppcl/command_queue.cpp cppcl/object.hpp cppcl/error_handler.hpp \
+				  cppcl/command_queue_properties.hpp cppcl/event.hpp cppcl/buffer.hpp cppcl/image.hpp \
+				  cppcl/map_buffer_flags.hpp cppcl/mapped_buffer.hpp
+	$(CC) $(CFLAGS) cppcl/command_queue.cpp
 
-event.o : src/event.hpp src/event.cpp src/error_handler.hpp src/command_queue.hpp
-	$(CC) $(CFLAGS) src/event.cpp
+event.o : cppcl/event.hpp cppcl/event.cpp cppcl/error_handler.hpp cppcl/command_queue.hpp
+	$(CC) $(CFLAGS) cppcl/event.cpp
 
-memory_object.o : src/memory_object.hpp src/memory_object.cpp src/memory_flags.hpp
-	$(CC) $(CFLAGS) src/memory_object.cpp
+memory_object.o : cppcl/memory_object.hpp cppcl/memory_object.cpp cppcl/memory_flags.hpp
+	$(CC) $(CFLAGS) cppcl/memory_object.cpp
 
-buffer.o : src/buffer.hpp src/buffer.cpp src/memory_object.hpp
-	$(CC) $(CFLAGS) src/buffer.cpp
+buffer.o : cppcl/buffer.hpp cppcl/buffer.cpp cppcl/memory_object.hpp
+	$(CC) $(CFLAGS) cppcl/buffer.cpp
 
-image.o : src/image.hpp src/image.cpp src/memory_object.hpp
-	$(CC) $(CFLAGS) src/image.cpp
+image.o : cppcl/image.hpp cppcl/image.cpp cppcl/memory_object.hpp
+	$(CC) $(CFLAGS) cppcl/image.cpp
 
-mapped_buffer.o : src/mapped_buffer.hpp src/mapped_buffer.cpp src/command_queue.hpp \
-				  src/memory_object.hpp src/event.hpp
-	$(CC) $(CFLAGS) src/mapped_buffer.cpp
+mapped_buffer.o : cppcl/mapped_buffer.hpp cppcl/mapped_buffer.cpp cppcl/command_queue.hpp \
+				  cppcl/memory_object.hpp cppcl/event.hpp
+	$(CC) $(CFLAGS) cppcl/mapped_buffer.cpp
 
-memory_flags.o : src/memory_flags.hpp src/memory_flags.cpp src/wrapper.hpp
-	$(CC) $(CFLAGS) src/memory_flags.cpp
+memory_flags.o : cppcl/memory_flags.hpp cppcl/memory_flags.cpp cppcl/wrapper.hpp
+	$(CC) $(CFLAGS) cppcl/memory_flags.cpp
 
 clean:
-	\rm *.o *~ src/*~ main
+	\rm *.o *~ cppcl/*~ main

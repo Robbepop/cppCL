@@ -37,7 +37,7 @@ namespace cl {
 			{ErrorCode::invalid_event, "the given event is invalid."},
 			{ErrorCode::execute_status_error_for_events_in_wait_list, "the execution status of the given event is invalid."}
 		};
-		error::handle<EventException>(clWaitForEvents(1, &m_id), error_map);
+		error::handle<EventException>(clWaitForEvents(1, std::addressof(m_id)), error_map);
 	}
 
 	void Event::callback(

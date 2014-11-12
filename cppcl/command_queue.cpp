@@ -16,7 +16,8 @@ namespace cl {
 			{ErrorCode::invalid_queue_properties, "values specified in properties are not supported by the given device."}
 		};
 		auto error = cl_int{CL_INVALID_VALUE};
-		auto new_id = clCreateCommandQueue(context.id(), device.id(), properties.mask(), &error);
+		auto new_id = clCreateCommandQueue(
+			context.id(), device.id(), properties.mask(), std::addressof(error));
 		if (error::handle<CommandQueueException>(error, error_map)) m_id = new_id;
 	}
 

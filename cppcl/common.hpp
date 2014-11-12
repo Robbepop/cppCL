@@ -24,7 +24,7 @@ namespace cl {
 			};
 			auto error = cl_int{CL_INVALID_VALUE};
 			auto info  = ReturnType{};
-			error = get_info(m_id, info_id, sizeof(ReturnType), &info, nullptr);
+			error = get_info(m_id, info_id, sizeof(ReturnType), std::addressof(info), nullptr);
 			error::handle<Exception>(error, error_map);
 		}
 
@@ -40,7 +40,7 @@ namespace cl {
 			};
 			auto error       = cl_int{CL_INVALID_VALUE};
 			auto buffer_size = cl_uint{0};
-			error = get_info(m_id, info_id, 0, nullptr, &buffer_size);
+			error = get_info(m_id, info_id, 0, nullptr, std::addressof(buffer_size));
 			error::handle<Exception>(error, error_map);
 			auto count_elems = (count_element_wise) ? buffer_size : buffer_size / sizeof(ReturnType);
 			auto info = std::vector<ReturnType>(count_elems);

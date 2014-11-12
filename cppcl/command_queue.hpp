@@ -98,7 +98,7 @@ namespace cl {
 				reinterpret_cast<ConvertType>(std::addressof(*first)),
 				num_events,
 				(num_events > 0) ? reinterpret_cast<const cl_event*>(events_in_wait_list->data()) : nullptr,
-				& event_id
+				std::addressof(event_id)
 			);
 			error::handle<CommandQueueException>(error, error_map);
 			return {event_id};
@@ -135,7 +135,7 @@ namespace cl {
 				reinterpret_cast<ConvertType>(data),
 				num_events,
 				(num_events > 0) ? reinterpret_cast<const cl_event*>(events_in_wait_list->data()) : nullptr,
-				& event_id
+				std::addressof(event_id)
 			);
 			error::handle<CommandQueueException>(error, error_map);
 			return {event_id};
@@ -210,8 +210,8 @@ namespace cl {
 					count_bytes * sizeof(DataType),
 					num_events,
 					(num_events > 0) ? reinterpret_cast<const cl_event*>(events_in_wait_list->data()) : nullptr,
-					& event_id,
-					& error
+					std::addressof(event_id),
+					std::addressof(error)
 				)
 			);
 			error::handle<CommandQueueException>(error, error_map);
@@ -245,7 +245,7 @@ namespace cl {
 				last,
 				buffer_offset,
 				sync,
-				& events_in_wait_list
+				std::addressof(events_in_wait_list)
 			);
 		}
 
@@ -281,7 +281,7 @@ namespace cl {
 				std::addressof(element) + 1,
 				buffer_offset,
 				sync,
-				& events_in_wait_list
+				std::addressof(events_in_wait_list)
 			);
 		}
 
@@ -325,7 +325,7 @@ namespace cl {
 				last,
 				buffer_offset,
 				sync,
-				& events_in_wait_list
+				std::addressof(events_in_wait_list)
 			);
 		}
 
@@ -361,7 +361,7 @@ namespace cl {
 				std::addressof(element) + 1,
 				buffer_offset,
 				sync,
-				& events_in_wait_list
+				std::addressof(events_in_wait_list)
 			);
 		}
 
@@ -399,7 +399,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			return enqueueCopyBuffer<DataType>(
-				src, dst, offset_src, offset_dst, count_elements, &events_in_wait_list
+				src, dst, offset_src, offset_dst, count_elements, std::addressof(events_in_wait_list)
 			);
 		}
 
@@ -410,7 +410,9 @@ namespace cl {
 			size_t count_elements,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueCopyBuffer<DataType>(src, dst, 0, 0, count_elements, &events_in_wait_list);
+			return enqueueCopyBuffer<DataType>(
+				src, dst, 0, 0, count_elements, std::addressof(events_in_wait_list)
+			);
 		}
 
 		template <typename DataType>
@@ -484,7 +486,9 @@ namespace cl {
 			CommandSync sync,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueMapBuffer<DataType>(buffer, sync, flags, buffer.size(), 0, &events_in_wait_list);
+			return enqueueMapBuffer<DataType>(
+				buffer, sync, flags, buffer.size(), 0, std::addressof(events_in_wait_list)
+			);
 		}
 
 		template <typename DataType>
@@ -495,7 +499,9 @@ namespace cl {
 			size_t size,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueMapBuffer<DataType>(buffer, sync, flags, size, 0, &events_in_wait_list);
+			return enqueueMapBuffer<DataType>(
+				buffer, sync, flags, size, 0, std::addressof(events_in_wait_list)
+			);
 		}
 
 		template <typename DataType>
@@ -507,7 +513,9 @@ namespace cl {
 			size_t offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueMapBuffer<DataType>(buffer, sync, flags, size, offset, &events_in_wait_list);
+			return enqueueMapBuffer<DataType>(
+				buffer, sync, flags, size, offset, std::addressof(events_in_wait_list)
+			);
 		}
 		/////////////////////////////////////////////////////////////////////////
 		/// MAP BUFFER - END

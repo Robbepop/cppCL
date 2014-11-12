@@ -36,7 +36,7 @@ namespace cl {
 			};
 			auto error = cl_int{CL_INVALID_VALUE};
 			auto info  = T{};
-			error = Functions::get_info(m_id, info_id, sizeof(T), &info, nullptr);
+			error = Functions::get_info(m_id, info_id, sizeof(T), std::addressof(info), nullptr);
 			error::handle<ExceptionType>(error, error_map);
 			return info;
 		}
@@ -48,7 +48,7 @@ namespace cl {
 			};
 			auto error       = cl_int{CL_INVALID_VALUE};
 			auto buffer_size = size_t{0};
-			error = Functions::get_info(m_id, info_id, 0, nullptr, &buffer_size);
+			error = Functions::get_info(m_id, info_id, 0, nullptr, std::addressof(buffer_size));
 			error::handle<ExceptionType>(error, error_map);
 			auto count_elems = buffer_size / sizeof(T);
 			auto info = std::vector<T>(count_elems);

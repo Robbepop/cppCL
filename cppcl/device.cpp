@@ -23,10 +23,12 @@ namespace cl {
 	) {
 		auto error = cl_int{CL_INVALID_VALUE};
 		auto count_elems = cl_uint{0};
-		error = clCreateSubDevices(m_id, properties.data(), 0, nullptr, &count_elems);
+		error = clCreateSubDevices(m_id, properties.data(), 0, nullptr, std::addressof(count_elems));
 		error::handle<DeviceException>(error, error_map);
 		auto subdevices = std::vector<Device>(count_elems, m_id);
-		error = clCreateSubDevices(m_id, properties.data(), count_elems, reinterpret_cast<cl_device_id*>(subdevices.data()), nullptr);
+		error = clCreateSubDevices(
+			m_id, properties.data(), count_elems, reinterpret_cast<cl_device_id*>(subdevices.data()), nullptr
+		);
 		error::handle<DeviceException>(error, error_map);
 		return std::move(subdevices);
 	}
@@ -219,7 +221,7 @@ namespace cl {
 	}
 
 	cl_uint Device::nativeVectorWidth(ScalarType type) const {
-		auto info_id = cl_device_info{};
+		const auto info_id = cl_device_info{};
 		switch (type) {
 			case ScalarType::char_type: info_id   = CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR; break;
 			case ScalarType::short_type: info_id  = CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT; break;

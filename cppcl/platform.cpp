@@ -9,7 +9,7 @@ namespace cl {
 	std::vector<Platform> Platform::getPlatforms() {
 		auto error = cl_int{CL_INVALID_VALUE};
 		auto num_platforms = cl_uint{0};
-		error = clGetPlatformIDs(0, nullptr, &num_platforms);
+		error = clGetPlatformIDs(0, nullptr, std::addressof(num_platforms));
 		if (error != CL_SUCCESS) return {};
 		auto platform_ids = std::vector<cl_platform_id>{num_platforms};
 		error = clGetPlatformIDs(num_platforms, platform_ids.data(), nullptr);

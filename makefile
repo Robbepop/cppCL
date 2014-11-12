@@ -15,8 +15,8 @@ LFLAGS = ${GFLAGS} ${LIB} ${INC} ${DEBUG}
 main : ${OBJS}
 	$(CC) $(LFLAGS) $(OBJS) -o main
 
-main.o : src/main.cpp src/wrapper.hpp src/error_handler.hpp src/exception.hpp
-	$(CC) $(CFLAGS) src/main.cpp
+main.o : main.cpp src/wrapper.hpp src/error_handler.hpp src/exception.hpp
+	$(CC) $(CFLAGS) main.cpp
 
 common.o : src/common.hpp src/common.cpp
 	$(CC) $(CFLAGS) src/common.cpp

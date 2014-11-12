@@ -1,13 +1,13 @@
 #include <iostream>
 #include <string>
 
-#include "wrapper.hpp"
-#include "platform.hpp"
-#include "device.hpp"
-#include "context.hpp"
-#include "context_properties.hpp"
-#include "error_handler.hpp"
-#include "exception.hpp"
+#include "src/wrapper.hpp"
+#include "src/platform.hpp"
+#include "src/device.hpp"
+#include "src/context.hpp"
+#include "src/context_properties.hpp"
+#include "src/error_handler.hpp"
+#include "src/exception.hpp"
 
 #include <type_traits>
 #include <unordered_map>

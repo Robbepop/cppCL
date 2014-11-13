@@ -2,6 +2,7 @@
 #define __CL_MEMORY_OBJECT_HEADER
 
 #include "memory_flags.hpp"
+#include "error_handler.hpp"
 
 namespace cl {
 	struct MemoryObjectFunctions final {

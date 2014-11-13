@@ -3,7 +3,9 @@
 
 #include "object.hpp"
 #include "context.hpp"
-#include "command_queue.hpp"
+//#include "command_queue.hpp"
+
+#include <memory>
 
 namespace cl {
 	class CommandQueue;
@@ -66,7 +68,7 @@ namespace cl {
 		);
 		void wait() const;
 
-		CommandQueue commandQueue() const;
+		std::unique_ptr<CommandQueue> commandQueue() const;
 		Context context() const;
 		CommandType commandType() const;
 		CommandExecutionStatus status() const;

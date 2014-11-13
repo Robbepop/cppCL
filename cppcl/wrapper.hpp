@@ -9,14 +9,21 @@
 
 #include <string>
 
-#define CL_VERSION_100
-#define CL_VERSION_110
-#define CL_VERSION_120
-//#define CL_VERSION_200
+#define CL_VERSION_100 100
+#define CL_VERSION_110 110
+#define CL_VERSION_120 120
+//#define CL_VERSION_200 200
 
 #define CL_DEVICE_HALF_FP_CONFIG 37
 
 namespace cl {
+	enum class OpenCLVersion : unsigned int {
+		v1_0 = 100,
+		v1_1 = 110,
+		v1_2 = 120,
+		v2_0 = 200
+	};
+
 	enum class AddressingMode : cl_addressing_mode {
 		none = CL_ADDRESS_NONE,
 		clamp_to_edge = CL_ADDRESS_CLAMP_TO_EDGE,

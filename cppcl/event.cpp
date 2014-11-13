@@ -1,4 +1,5 @@
 #include "event.hpp"
+#include "command_queue.hpp"
 
 #include <type_traits>
 
@@ -60,14 +61,15 @@ namespace cl {
 		);
 	}
 
-	CommandQueue Event::commandQueue() const {
+	std::unique_ptr<CommandQueue> Event::commandQueue() const {
 		static const auto error_map = error::ErrorMap{
 			{ErrorCode::invalid_event, "can not get command queue of a user event."}
 		};
 		auto queue = getInfo<cl_command_queue>(CL_EVENT_COMMAND_QUEUE);
 		auto error = (queue == NULL) ? ErrorCode::invalid_event : ErrorCode::success;
 		error::handle<EventException>(error, error_map);
-		return {queue};
+		//return {queue};
+		return std::make_unique<CommandQueue>(queue);
 	}
 
 	Context Event::context() const {

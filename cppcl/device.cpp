@@ -221,15 +221,15 @@ namespace cl {
 	}
 
 	cl_uint Device::nativeVectorWidth(ScalarType type) const {
-		const auto info_id = cl_device_info{};
+		auto info_id = cl_device_info{};
 		switch (type) {
-			case ScalarType::char_type: info_id   = CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR; break;
-			case ScalarType::short_type: info_id  = CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT; break;
-			case ScalarType::int_type: info_id    = CL_DEVICE_NATIVE_VECTOR_WIDTH_INT; break;
-			case ScalarType::long_type: info_id   = CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG; break;
-			case ScalarType::float_type: info_id  = CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT; break;
+			case ScalarType::char_type:   info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR;   break;
+			case ScalarType::short_type:  info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT;  break;
+			case ScalarType::int_type:    info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_INT;    break;
+			case ScalarType::long_type:   info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG;   break;
+			case ScalarType::float_type:  info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT;  break;
 			case ScalarType::double_type: info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE; break;
-			case ScalarType::half_type: info_id   = CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF; break;
+			case ScalarType::half_type:   info_id = CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF;   break;
 		}
 		return getInfo<cl_uint>(info_id);
 	}

@@ -1,6 +1,9 @@
 #ifndef __CL_MEMORY_OBJECT_HEADER
 #define __CL_MEMORY_OBJECT_HEADER
 
+#include "wrapper.hpp"
+#include "object.hpp"
+#include "context.hpp"
 #include "memory_flags.hpp"
 #include "error_handler.hpp"
 
@@ -31,24 +34,47 @@ namespace cl {
 		}
 	};
 
-	template <typename T>
+	template <typename DataType>
 	class MemoryObject : public Object<cl_mem, cl_mem_info, MemoryObjectFunctions, MemoryObjectException> {
+	private:
 		MemoryObject() = delete;
 
 	public:
-		MemoryObjectType type() const;
-		MemoryFlags flags() const;
-		size_t size() const;
-
-		T* hostPointer() const {
-			return reinterpret_cast<T*>(getInfo<void*>(CL_MEM_HOST_PTR));
+		MemoryObjectType type() const {
+			return static_cast<MemoryObjectType>(getInfo<cl_mem_object_type>(CL_MEM_TYPE));
 		}
 
-		cl_uint mapCount() const;
-		cl_uint referenceCount() const;
-		Context const& context() const;
-		MemoryObject const& associatedMemoryObject() const;
-		size_t offset() const;
+		MemoryFlags flags() const {
+			return MemoryFlags(getInfo<cl_mem_flags>(CL_MEM_FLAGS));
+		}
+
+		size_t size() const {
+			return getInfo<size_t>(CL_MEM_SIZE);
+		}
+
+		cl_uint mapCount() const {
+			return getInfo<cl_uint>(CL_MEM_MAP_COUNT);
+		}
+
+		cl_uint referenceCount() const {
+			return getInfo<cl_uint>(CL_MEM_REFERENCE_COUNT);
+		}
+
+		Context const& context() const {
+			return {getInfo<cl_context>(CL_MEM_CONTEXT)};
+		}
+
+		MemoryObject const& associatedMemoryObject() const {
+			return {getInfo<cl_mem>(CL_MEM_ASSOCIATED_MEMOBJECT)};
+		}
+
+		size_t offset() const {
+			return getInfo<size_t>(CL_MEM_OFFSET);
+		}
+
+		DataType* hostPointer() const {
+			return reinterpret_cast<DataType*>(getInfo<void*>(CL_MEM_HOST_PTR));
+		}
 	};
 }
 

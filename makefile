@@ -63,7 +63,8 @@ command_queue.o : cppcl/command_queue.hpp cppcl/command_queue.cpp cppcl/object.h
 event.o : cppcl/event.hpp cppcl/event.cpp cppcl/error_handler.hpp cppcl/command_queue.hpp
 	$(CC) $(CFLAGS) cppcl/event.cpp
 
-memory_object.o : cppcl/memory_object.hpp cppcl/memory_object.cpp cppcl/memory_flags.hpp
+memory_object.o : cppcl/memory_object.hpp cppcl/memory_object.cpp cppcl/memory_flags.hpp \
+				  cppcl/wrapper.hpp cppcl/context.hpp cppcl/object.hpp
 	$(CC) $(CFLAGS) cppcl/memory_object.cpp
 
 buffer.o : cppcl/buffer.hpp cppcl/buffer.cpp cppcl/memory_object.hpp

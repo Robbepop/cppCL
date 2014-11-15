@@ -52,15 +52,46 @@ namespace cl {
 	private:
 		struct read_operation final {
 			using convert_type = void*;
-			using func = decltype(clEnqueueReadBuffer);
+			static decltype(auto) func(
+				cl_command_queue command_queue,
+				cl_mem buffer,
+				cl_bool blocking_read,
+				size_t offset,
+				size_t size,
+				void *ptr,
+				cl_uint num_events_in_wait_list,
+				const cl_event *event_wait_list,
+				cl_event *event
+			) {
+				return clEnqueueReadBuffer(
+					command_queue, buffer, blocking_read, offset, size, ptr,
+					num_events_in_wait_list, event_wait_list, event
+				);
+			}
 		};
 
 		struct write_operation final {
 			using convert_type = const void*;
-			using func = decltype(clEnqueueWriteBuffer);
+			static decltype(auto) func(
+				cl_command_queue command_queue,
+				cl_mem buffer,
+				cl_bool blocking_write,
+				size_t offset,
+				size_t size,
+				const void *ptr,
+				cl_uint num_events_in_wait_list,
+				const cl_event *event_wait_list,
+				cl_event *event
+			) {
+				return clEnqueueWriteBuffer(
+					command_queue, buffer, blocking_write, offset, size, ptr,
+					num_events_in_wait_list, event_wait_list, event
+				);
+			}
 		};
 
-		template <typename DataType, typename Operation, typename Iterator, CommandSync Sync>
+		//template <typename DataType, typename Operation, typename Iterator, CommandSync Sync>
+		template <typename DataType, CommandSync Sync, typename Operation, typename Iterator>
 		typename std::conditional<static_cast<cl_bool>(Sync), void, Event>::type
 		enqueueReadWrite(
 			Buffer<DataType> const& buffer,
@@ -233,7 +264,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			enqueueReadWrite<DataType, read_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, read_operation, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -246,7 +277,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueReadWrite<DataType, read_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, read_operation, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -258,7 +289,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			enqueueReadWrite<DataType, read_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, read_operation, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -270,7 +301,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			return enqueueReadWrite<DataType, read_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, read_operation, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -283,7 +314,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, read_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, read_operation>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -296,7 +327,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, read_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, read_operation>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -308,7 +339,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, read_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, read_operation>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}
@@ -320,7 +351,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, read_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, read_operation>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}

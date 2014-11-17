@@ -73,6 +73,10 @@ namespace cl {
 		size_t offset() const {
 			return MemoryObject::getInfo<size_t>(CL_MEM_OFFSET);
 		}
+
+		size_t count_elements() const {
+			return MemoryObject::size() / sizeof(DataType);
+		}
 	};
 
 }

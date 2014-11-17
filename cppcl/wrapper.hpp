@@ -9,10 +9,28 @@
 
 #include <string>
 
-#define CL_VERSION_100 100
-#define CL_VERSION_110 110
-#define CL_VERSION_120 120
-//#define CL_VERSION_200 200
+#define CPPCL_CL_VERSION_1_0 100
+#define CPPCL_CL_VERSION_1_1 110
+#define CPPCL_CL_VERSION_1_2 120
+#define CPPCL_CL_VERSION_2_0 200
+
+#define CPPCL_CL_VERSION CPPCL_CL_VERSION_1_2
+
+#if (CPPCL_CL_VERSION >= CL_VERSION_1_0)
+#define CPPCL_CL_VERSION_1_0_ENABLED
+#endif
+
+#if (CPPCL_CL_VERSION >= CL_VERSION_1_1)
+#define CPPCL_CL_VERSION_1_1_ENABLED
+#endif
+
+#if (CPPCL_CL_VERSION >= CL_VERSION_1_2)
+#define CPPCL_CL_VERSION_1_2_ENABLED
+#endif
+
+#if (CPPCL_CL_VERSION >= CL_VERSION_2_0)
+#define CPPCL_CL_VERSION_2_0_ENABLED
+#endif
 
 #define CL_DEVICE_HALF_FP_CONFIG 37
 
@@ -242,6 +260,7 @@ namespace cl {
 		invalid_device_partition_count      = CL_INVALID_DEVICE_PARTITION_COUNT
 	};
 
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 	enum class DeviceAffinityDomain : cl_device_affinity_domain {
 		numa = CL_DEVICE_AFFINITY_DOMAIN_NUMA,
 		l4_cache           = CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE,
@@ -250,6 +269,7 @@ namespace cl {
 		l1_cache           = CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE,
 		next_partitionable = CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE
 	};
+#endif
 }
 
 #endif

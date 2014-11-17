@@ -243,6 +243,44 @@ namespace cl {
 			return MappedBuffer<DataType>(*this, buffer, Event(event_id), ptr, count_elems);
 		}
 
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		template <typename DataType>
+		Event enqueueFillBuffer(
+			Buffer<DataType> const& buffer,
+			DataType const& value,
+			size_t offset,
+			size_t count_elements,
+			std::vector<Event> const* events_in_wait_list
+		) {
+			static const auto error_map = error::ErrorMap{
+				{ErrorCode::invalid_command_queue, "this command queue is invalid."},
+				{ErrorCode::invalid_context, "the given context is invalid."},
+				{ErrorCode::invalid_memory_object, "the given buffer is an invalid memory object."},
+				{ErrorCode::invalid_value, "the specified offset and count_elements requires accessing data outside the given buffer."},
+				{ErrorCode::invalid_event_wait_list, "one or more event objects in the given event list are invalid."},
+				{ErrorCode::misaligned_sub_buffer_offset, "buffer is a subbuffer with a misaligned offset."},
+				{ErrorCode::memory_object_allocation_failure, "failed to allocated memory for data store associated with this buffer operation."}
+			};
+			const auto byte_offest = offset * sizeof(DataType);
+			const auto byte_size = count_elements * sizeof(DataType);
+			const auto num_events = (events_in_wait_list != nullptr) ? events_in_wait_list->size() : 0;
+			auto event_id = cl_event{0};
+			auto error = clEnqueueFillBuffer(
+				m_id,
+				buffer.id(),
+				reinterpret_cast<const void*>(std::addressof(value)),
+				sizeof(DataType),
+				byte_offest,
+				byte_size,
+				num_events,
+				(num_events > 0) ? reinterpret_cast<const cl_event*>(events_in_wait_list->data()) : nullptr,
+				std::addressof(event_id)
+			);
+			error::handle<CommandQueueException>(error, error_map);
+			return {event_id};
+		}
+#endif
+
 	public:
 		CommandQueue(cl_command_queue command_queue_id);
 		CommandQueue(Context const& context, Device const& device, CommandQueueProperties const& properties);
@@ -601,14 +639,54 @@ namespace cl {
 		/// MAP BUFFER - END
 		/////////////////////////////////////////////////////////////////////////
 
-#if defined(CL_VERSION_110)
+#if defined(CPPCL_CL_VERSION_1_1_ENABLED)
 		Event enqueueReadBufferRect();
 		Event enqueueWriteBufferRect();
 		Event enqueueCopyBufferRect();
 #endif
 
-#if defined(CL_VERSION_120)
-		Event enqueueFillBuffer();
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		/////////////////////////////////////////////////////////////////////////
+		/// FILL BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
+		template <typename DataType>
+		Event enqueueFillBuffer(
+			Buffer<DataType> buffer,
+			DataType const& value,
+			size_t offset,
+			size_t count_elements,
+			std::vector<Event> const& events_in_wait_list
+		) {
+			return enqueueFillBuffer<DataType>(
+				buffer, value, offset, count_elements, std::addressof(events_in_wait_list)
+			);
+		}
+
+		template <typename DataType>
+		Event enqueueFillBuffer(
+			Buffer<DataType> buffer,
+			DataType const& value,
+			size_t offset,
+			size_t count_elements
+		) {
+			return enqueueFillBuffer<DataType>(
+				buffer, value, offset, count_elements, nullptr
+			);
+		}
+
+		template <typename DataType>
+		Event enqueueFillBuffer(
+			Buffer<DataType> buffer,
+			DataType const& value,
+			size_t offset = 0
+		) {
+			return enqueueFillBuffer<DataType>(
+				buffer, value, offset, buffer.count_elements(), nullptr
+			);
+		}
+		/////////////////////////////////////////////////////////////////////////
+		/// FILL BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 #endif
 	};
 }

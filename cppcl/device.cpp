@@ -17,6 +17,7 @@ namespace cl {
 		Object(id)
 	{}
 
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 	std::vector<Device> Device::partition(
 		std::vector<cl_device_partition_property> const& properties,
 		error::ErrorMap error_map
@@ -73,6 +74,7 @@ namespace cl {
 		};
 		return partition(properties, error_map);
 	}
+#endif
 
 	cl_uint Device::addressBits() const {
 		return getInfo<cl_uint>(CL_DEVICE_ADDRESS_BITS);

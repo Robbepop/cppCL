@@ -19,13 +19,13 @@ namespace cl {
 
 	public:
 		static decltype(auto) release(cl_device_id id) {
-#if defined(CL_VERSION_120)
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 			error::handle<DeviceException>(clReleaseDevice(id), error_map);
 #endif
 		}
 
 		static decltype(auto) retain(cl_device_id id) {
-#if defined(CL_VERSION_120)
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 			error::handle<DeviceException>(clRetainDevice(id), error_map);
 #endif
 		}
@@ -47,7 +47,7 @@ namespace cl {
 	public:
 		Device(cl_device_id id);
 
-#if defined(CL_VERSION_120)
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 	private:
 		std::vector<Device> partition(std::vector<cl_device_partition_property> const& properties, error::ErrorMap error_map);
 	public:

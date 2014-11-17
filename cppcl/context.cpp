@@ -13,6 +13,7 @@ namespace cl {
 		Object{context_id}
 	{}
 
+	/*
 	Context::Context(
 		const ContextProperties & properties,
 		const std::vector<Device> & devices,
@@ -73,6 +74,7 @@ namespace cl {
 		);
 		if (error::handle<ContextException>(error, error_map)) m_id = new_id;
 	}
+	*/
 
 	cl_uint Context::referenceCount() const {
 		return getInfo<cl_uint>(CL_CONTEXT_REFERENCE_COUNT);

@@ -34,10 +34,17 @@ namespace cl {
 		}
 	};
 
-	template <typename DataType>
 	class MemoryObject : public Object<cl_mem, cl_mem_info, MemoryObjectFunctions, MemoryObjectException> {
 	private:
 		MemoryObject() = delete;
+
+	protected:
+		using Object::Object;
+
+		template <typename DataType>
+		DataType* hostPointer() const {
+			return reinterpret_cast<DataType*>(getInfo<void*>(CL_MEM_HOST_PTR));
+		}
 
 	public:
 		MemoryObjectType type() const {
@@ -60,20 +67,8 @@ namespace cl {
 			return getInfo<cl_uint>(CL_MEM_REFERENCE_COUNT);
 		}
 
-		Context const& context() const {
+		Context context() const {
 			return {getInfo<cl_context>(CL_MEM_CONTEXT)};
-		}
-
-		MemoryObject const& associatedMemoryObject() const {
-			return {getInfo<cl_mem>(CL_MEM_ASSOCIATED_MEMOBJECT)};
-		}
-
-		size_t offset() const {
-			return getInfo<size_t>(CL_MEM_OFFSET);
-		}
-
-		DataType* hostPointer() const {
-			return reinterpret_cast<DataType*>(getInfo<void*>(CL_MEM_HOST_PTR));
 		}
 	};
 }

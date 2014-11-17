@@ -57,15 +57,21 @@ namespace cl {
 	};
 
 	class Event final : public Object<cl_event, cl_event_info, EventFunctions, EventException> {
+	private:
+		void setStatus(CommandExecutionStatus status);
+
 	public:
 		Event(cl_event event_id);
 		Event(Context const& context);
-		void status(UserEventStatus s);
+
+		void finish();
+		void fail();
 		void callback(
 			CommandExecutionCallbackType status,
 			void (*pfn_notify) (cl_event event, cl_int status, void * user_data),
 			void * user_data
 		);
+
 		void wait() const;
 
 		std::unique_ptr<CommandQueue> commandQueue() const;

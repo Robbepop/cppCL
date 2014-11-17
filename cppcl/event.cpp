@@ -19,7 +19,7 @@ namespace cl {
 		if (error::handle<EventException>(error, error_map)) m_id = new_id;
 	}
 
-	void Event::status(UserEventStatus state) {
+	void Event::setStatus(CommandExecutionStatus status) {
 		static const auto error_map = error::ErrorMap{
 			{ErrorCode::invalid_event, "the given user event was invalid."},
 			{ErrorCode::invalid_value, "the given execution status is invalid."},
@@ -27,10 +27,18 @@ namespace cl {
 		};
 		error::handle<EventException>(
 			clSetUserEventStatus(
-				m_id,
-				static_cast<std::underlying_type<UserEventStatus>::type>(state)),
+				m_id, static_cast<std::underlying_type<CommandExecutionStatus>::type>(status)
+			),
 			error_map
 		);
+	}
+
+	void Event::finish() {
+		this->setStatus(CommandExecutionStatus::complete);
+	}
+
+	void Event::fail() {
+		this->setStatus(CommandExecutionStatus::error);
 	}
 
 	void Event::wait() const {
@@ -68,7 +76,7 @@ namespace cl {
 		auto queue = getInfo<cl_command_queue>(CL_EVENT_COMMAND_QUEUE);
 		auto error = (queue == NULL) ? ErrorCode::invalid_event : ErrorCode::success;
 		error::handle<EventException>(error, error_map);
-		//return {queue};
+		//return {queue}; //invalid due to cyclic dependency with command_queue.hpp
 		return std::make_unique<CommandQueue>(queue);
 	}
 

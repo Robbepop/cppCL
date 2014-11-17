@@ -6,7 +6,7 @@
 #include "event.hpp"
 
 namespace cl {
-	template <typename T>
+	template <typename DataType>
 	class MappedBuffer final {
 		class CommandQueue;
 		class MemoryObject;
@@ -17,7 +17,7 @@ namespace cl {
 		MemoryObject const& m_mem_object;
 
 		Event const& m_event;
-		T* m_mapped_ptr;
+		DataType* m_mapped_ptr;
 		size_t m_count_elements;
 
 	public:
@@ -25,7 +25,7 @@ namespace cl {
 			CommandQueue cmd_queue,
 			MemoryObject mem_object,
 			Event const& event,
-			T* mapped_ptr,
+			DataType* mapped_ptr,
 			size_t count_elements
 		) :
 			m_cmd_queue{cmd_queue},
@@ -50,19 +50,19 @@ namespace cl {
 			return m_event;
 		}
 
-		T const* cbegin() const {
-			return reinterpret_cast<T const*>(m_mapped_ptr);
+		DataType const* cbegin() const {
+			return reinterpret_cast<DataType const*>(m_mapped_ptr);
 		}
 
-		T const* cend() const {
-			return reinterpret_cast<T const*>(m_mapped_ptr + m_count_elements);
+		DataType const* cend() const {
+			return reinterpret_cast<DataType const*>(m_mapped_ptr + m_count_elements);
 		}
 
-		T* begin() {
+		DataType* begin() {
 			return m_mapped_ptr;
 		}
 
-		T* end() {
+		DataType* end() {
 			return m_mapped_ptr + m_count_elements;
 		}
 

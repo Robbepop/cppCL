@@ -5,8 +5,8 @@
 
 namespace cl {
 
-	template <typename T>
-	class Image final : public MemoryObject<T> {
+	template <typename DataType>
+	class Image final : public MemoryObject {
 
 	};
 

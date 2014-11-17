@@ -90,7 +90,6 @@ namespace cl {
 			}
 		};
 
-		//template <typename DataType, typename Operation, typename Iterator, CommandSync Sync>
 		template <typename DataType, CommandSync Sync, typename Operation, typename Iterator>
 		typename std::conditional<static_cast<cl_bool>(Sync), void, Event>::type
 		enqueueReadWrite(
@@ -371,7 +370,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			enqueueReadWrite<DataType, write_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, write_operation, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -384,7 +383,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueReadWrite<DataType, write_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, write_operation, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -396,7 +395,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			enqueueReadWrite<DataType, write_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, write_operation, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -408,7 +407,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			return enqueueReadWrite<DataType, write_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, write_operation, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -421,7 +420,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, write_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, write_operation>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -434,7 +433,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, write_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, write_operation>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -446,7 +445,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, write_operation, CommandSync::blocking>(
+			enqueueReadWrite<DataType, CommandSync::blocking, write_operation>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}
@@ -458,7 +457,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, write_operation, CommandSync::async>(
+			return enqueueReadWrite<DataType, CommandSync::async, write_operation>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}

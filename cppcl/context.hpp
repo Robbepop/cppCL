@@ -43,16 +43,6 @@ namespace cl {
 	public:
 		Context(cl_context context_id);
 
-		Context(
-			const ContextProperties & properties,
-			const std::vector<Device> & devices,
-			void (*pfn_notify) (
-				const char * error_info,
-				const void * private_info, size_t cb,
-				void * user_data) = nullptr,
-			void * user_data = nullptr
-		);
-
 		template <typename Function, typename T>
 		Context(
 			ContextProperties const& properties,
@@ -115,16 +105,6 @@ namespace cl {
 			if (error::handle<ContextException>(error, error_map)) m_id = new_id;
 			//if (error::handle<ContextException, error_lambda>(error)) m_id = new_id;
 		}
-
-		Context(
-			const ContextProperties & properties,
-			DeviceType type,
-			void (*pfn_notify) (
-				const char * error_info,
-				const void * private_info, size_t cb,
-				void * user_data) = nullptr,
-			void * user_data = nullptr
-		);
 
 		cl_uint referenceCount() const;
 		cl_uint numDevices() const;

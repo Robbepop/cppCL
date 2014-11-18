@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <cassert>
 #include <memory>
+#include <algorithm>
 
 namespace cl {
 	class Context;
@@ -242,6 +243,143 @@ namespace cl {
 			error::handle<CommandQueueException>(error, error_map);
 			return MappedBuffer<DataType>(*this, buffer, Event(event_id), ptr, count_elems);
 		}
+
+#if defined(CPPCL_CL_VERSION_1_1_ENABLED)
+		template <typename DataType>
+		Event enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			size_t const* src_offset_ptr,
+			size_t const* dst_offset_ptr,
+			size_t const* dimensions_ptr,
+			size_t src_row_pitch,
+			size_t src_slice_pitch,
+			size_t dst_row_pitch,
+			size_t dst_slice_pitch,
+			std::vector<Event> const* event_wait_list
+		) {
+			static const auto error_map = error::ErrorMap{
+				{ErrorCode::invalid_command_queue, "this command queue is invalid."},
+				{ErrorCode::invalid_context, "the context of this command queue is invalid."},
+				{ErrorCode::invalid_memory_object, "src and/or dst buffers are invalid."},
+				{ErrorCode::invalid_value, "specified offsets and regions to access invalid data out of bounds of the buffer areas; OR if any element in region is null; OR if any given pitch value is invalid."},
+				{ErrorCode::memory_copy_overlap, "regions specified are overlapping memory regions within the given buffer objects."},
+				{ErrorCode::misaligned_sub_buffer_offset, "src or dst buffers are subbuffers with invalid alignment."},
+				{ErrorCode::memory_object_allocation_failure, "failed to allocate memory for data store associated with src or dst."}
+			};
+			auto event_id = cl_event{0};
+			const auto num_events = (event_wait_list != nullptr) ? event_wait_list->size() : 0;
+			auto error = clEnqueueCopyBufferRect(
+				m_id, src.id(), dst.id(),
+				src_offset_ptr, dst_offset_ptr, dimensions_ptr,
+				src_row_pitch, src_slice_pitch,
+				dst_row_pitch, dst_slice_pitch,
+				num_events,
+				(num_events > 0) ? reinterpret_cast<const cl_event*>(event_wait_list->data()) : nullptr,
+				std::addressof(event_id)
+			);
+			error::handle<CommandQueueException>(error, error_map);
+			return {event_id};
+		}
+
+		template <typename DataType, size_t N>
+		typename std::enable_if<N == 1, Event>::type		
+		enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			std::array<size_t, N> const& src_offset,
+			std::array<size_t, N> const& dst_offset,
+			std::array<size_t, N> const& dimensions,
+			size_t src_row_pitch,
+			size_t src_slice_pitch,
+			size_t dst_row_pitch,
+			size_t dst_slice_pitch,
+			std::vector<Event> const* event_wait_list
+		) {
+			const auto data_size = sizeof(DataType);
+			const auto src_offset_complete = std::array<size_t, 3>{
+				src_offset[0] * data_size, 0, 0
+			};
+			const auto dst_offset_complete = std::array<size_t, 3>{
+				dst_offset[0] * data_size, 0, 0
+			};
+			const auto dimensions_complete = std::array<size_t, 3>{
+				dimensions[0] * data_size, 1, 1
+			};
+			return enqueueCopyBufferRect<DataType>(
+				src, dst,
+				std::addressof(src_offset_complete),
+				std::addressof(dst_offset_complete),
+				std::addressof(dimensions_complete),
+				src_row_pitch, src_slice_pitch,
+				dst_row_pitch, dst_slice_pitch,
+				event_wait_list
+			);
+		}
+
+		template <typename DataType, size_t N>
+		typename std::enable_if<N == 2, Event>::type		
+		enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			std::array<size_t, N> const& src_offset,
+			std::array<size_t, N> const& dst_offset,
+			std::array<size_t, N> const& dimensions,
+			size_t src_row_pitch,
+			size_t src_slice_pitch,
+			size_t dst_row_pitch,
+			size_t dst_slice_pitch,
+			std::vector<Event> const* event_wait_list
+		) {
+			const auto data_size = sizeof(DataType);
+			const auto src_offset_complete = std::array<size_t, 3>{
+				src_offset[0] * data_size, src_offset[1] * data_size, 0
+			};
+			const auto dst_offset_complete = std::array<size_t, 3>{
+				dst_offset[0] * data_size, dst_offset[1] * data_size, 0
+			};
+			const auto dimensions_complete = std::array<size_t, 3>{
+				dimensions[0] * data_size, dimensions[1] * data_size, 1
+			};
+			return enqueueCopyBufferRect<DataType>(
+				src, dst,
+				std::addressof(src_offset_complete),
+				std::addressof(dst_offset_complete),
+				std::addressof(dimensions_complete),
+				src_row_pitch, src_slice_pitch,
+				dst_row_pitch, dst_slice_pitch,
+				event_wait_list
+			);
+		}
+
+		template <typename DataType, size_t N>
+		typename std::enable_if<N == 3, Event>::type		
+		enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			std::array<size_t, N> const& src_offset,
+			std::array<size_t, N> const& dst_offset,
+			std::array<size_t, N> const& dimensions,
+			size_t src_row_pitch,
+			size_t src_slice_pitch,
+			size_t dst_row_pitch,
+			size_t dst_slice_pitch,
+			std::vector<Event> const* event_wait_list
+		) {
+			std::for_each(begin(src_offset), end(src_offset), [](DataType& value) {value *= sizeof(DataType);});
+			std::for_each(begin(dst_offset), end(dst_offset), [](DataType& value) {value *= sizeof(DataType);});
+			std::for_each(begin(dimensions), end(dimensions), [](DataType& value) {value *= sizeof(DataType);});
+			return enqueueCopyBufferRect<DataType>(
+				src, dst,
+				std::addressof(src_offset),
+				std::addressof(dst_offset),
+				std::addressof(dimensions),
+				src_row_pitch, src_slice_pitch,
+				dst_row_pitch, dst_slice_pitch,
+				event_wait_list
+			);
+		}
+#endif
 
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 		template <typename DataType>
@@ -642,7 +780,66 @@ namespace cl {
 #if defined(CPPCL_CL_VERSION_1_1_ENABLED)
 		Event enqueueReadBufferRect();
 		Event enqueueWriteBufferRect();
-		Event enqueueCopyBufferRect();
+
+		template <typename DataType, size_t N>
+		Event enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			std::array<size_t, N> const& src_offset,
+			std::array<size_t, N> const& dst_offset,
+			std::array<size_t, N> const& dimensions,
+			size_t src_row_pitch,
+			size_t src_slice_pitch,
+			size_t dst_row_pitch,
+			size_t dst_slice_pitch,
+			std::vector<Event> const& event_wait_list
+		) {
+			return enqueueCopyBufferRect<DataType, N>(
+				src, dst,
+				src_offset, dst_offset, dimensions,
+				src_row_pitch, src_slice_pitch,
+				dst_row_pitch, dst_slice_pitch,
+				std::addressof(event_wait_list)
+			);
+		}
+
+		template <typename DataType, size_t N>
+		Event enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			std::array<size_t, N> const& src_offset,
+			std::array<size_t, N> const& dst_offset,
+			std::array<size_t, N> const& dimensions,
+			size_t src_row_pitch = 0,
+			size_t src_slice_pitch = 0,
+			size_t dst_row_pitch = 0,
+			size_t dst_slice_pitch = 0
+		) {
+			return enqueueCopyBufferRect<DataType, N>(
+				src, dst,
+				src_offset, dst_offset, dimensions,
+				src_row_pitch, src_slice_pitch,
+				dst_row_pitch, dst_slice_pitch,
+				nullptr
+			);
+		}
+
+		template <typename DataType, size_t N>
+		Event enqueueCopyBufferRect(
+			Buffer<DataType> const& src,
+			Buffer<DataType> const& dst,
+			std::array<size_t, N> const& src_offset,
+			std::array<size_t, N> const& dst_offset,
+			std::array<size_t, N> const& dimensions,
+			std::vector<Event> const& event_wait_list
+		) {
+			return enqueueCopyBufferRect<DataType, N>(
+				src, dst,
+				src_offset, dst_offset, dimensions,
+				0, 0, 0, 0,
+				std::addressof(event_wait_list)
+			);
+		}
 #endif
 
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)

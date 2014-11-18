@@ -1,2 +1,0 @@
-- resolve the cyclic dependency problem between commandqueue.hpp and event.hpp files.
-- implement correct clRetain<> and clRelease<> functionality.

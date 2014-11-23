@@ -8,20 +8,24 @@
 #include "error_handler.hpp"
 
 namespace cl {
-	struct MemoryObjectFunctions final {
+	struct MemoryObjectInfo final {
 	private:
 		static const error::ErrorMap error_map;
 
 	public:
-		static decltype(auto) release(cl_mem id) {
+		using cl_type = cl_mem;
+		using info_type = cl_mem_info;
+		using exception_type = MemoryObjectException;
+
+		static decltype(auto) func_release(cl_mem id) {
 			error::handle<CommandQueueException>(clReleaseMemObject(id), error_map);
 		}
 
-		static decltype(auto) retain(cl_mem id) {
+		static decltype(auto) func_retain(cl_mem id) {
 			error::handle<CommandQueueException>(clRetainMemObject(id), error_map);
 		}
 
-		static decltype(auto) get_info
+		static decltype(auto) func_info
 		(
 			cl_mem memory_object,
 			cl_mem_info param_name,
@@ -34,7 +38,8 @@ namespace cl {
 		}
 	};
 
-	class MemoryObject : public Object<cl_mem, cl_mem_info, MemoryObjectFunctions, MemoryObjectException> {
+	//class MemoryObject : public Object<cl_mem, cl_mem_info, MemoryObjectFunctions, MemoryObjectException> {
+	class MemoryObject : public Object<MemoryObjectInfo> {
 	private:
 		MemoryObject() = delete;
 

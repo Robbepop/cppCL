@@ -13,20 +13,24 @@ namespace cl {
 	class ContextProperties;
 	class ContextException;
 
-	struct ContextFunctions final {
+	struct ContextInfo final {
 	private:
 		static const error::ErrorMap error_map;
 
 	public:
-		static decltype(auto) release(cl_context id) {
+		using cl_type = cl_context;
+		using info_type = cl_context_info;
+		using exception_type = ContextException;
+
+		static decltype(auto) func_release(cl_context id) {
 			error::handle<ContextException>(clReleaseContext(id), error_map);
 		}
 
-		static decltype(auto) retain(cl_context id) {
+		static decltype(auto) func_retain(cl_context id) {
 			error::handle<ContextException>(clRetainContext(id), error_map);
 		}
 
-		static decltype(auto) get_info
+		static decltype(auto) func_info
 		(
 			cl_context context,
 			cl_context_info param_name,
@@ -39,7 +43,7 @@ namespace cl {
 		}
 	};
 
-	class Context final : public Object<cl_context, cl_context_info, ContextFunctions, ContextException> {
+	class Context final : public Object<ContextInfo> {
 	public:
 		Context(cl_context context_id);
 

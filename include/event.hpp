@@ -30,20 +30,24 @@ namespace cl {
 		complete = CL_COMPLETE
 	};
 
-	struct EventFunctions final {
+	struct EventInfo final {
 	private:
 		static const error::ErrorMap error_map;
 
 	public:
-		static decltype(auto) release(cl_event id) {
+		using cl_type = cl_event;
+		using info_type = cl_event_info;
+		using exception_type = EventException;
+
+		static decltype(auto) func_release(cl_event id) {
 			error::handle<EventException>(clReleaseEvent(id), error_map);
 		}
 
-		static decltype(auto) retain(cl_event id) {
+		static decltype(auto) func_retain(cl_event id) {
 			error::handle<EventException>(clRetainEvent(id), error_map);
 		}
 
-		static decltype(auto) get_info
+		static decltype(auto) func_info
 		(
 			cl_event event,
 			cl_event_info param_name,
@@ -56,7 +60,7 @@ namespace cl {
 		}
 	};
 
-	class Event final : public Object<cl_event, cl_event_info, EventFunctions, EventException> {
+	class Event final : public Object<EventInfo> {
 	private:
 		void setStatus(CommandExecutionStatus status);
 

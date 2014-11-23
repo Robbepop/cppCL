@@ -40,6 +40,7 @@ namespace cl {
 			if (error::handle<MemoryObjectException>(error, error_map)) m_id = buffer_id;
 		}
 
+#if defined(CPPCL_CL_VERSION_1_1_ENABLED)
 		Buffer<DataType> createSubBuffer(
 			MemoryFlags const& flags,
 			size_t offset,
@@ -65,6 +66,7 @@ namespace cl {
 			error::handle<MemoryObjectException>(error, error_map);
 			return {subbuffer_id};
 		}
+#endif
 
 		Buffer<DataType> associatedMemoryObject() const {
 			return {MemoryObject::getInfo<cl_mem>(CL_MEM_ASSOCIATED_MEMOBJECT)};

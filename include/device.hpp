@@ -13,24 +13,28 @@ namespace cl {
 	class CommandQueueProperties;
 	class DeviceException;
 
-	struct DeviceFunctions final {
+	struct DeviceInfo final {
 	private:
 		static const error::ErrorMap error_map;
 
 	public:
-		static decltype(auto) release(cl_device_id id) {
+		using cl_type = cl_device_id;
+		using info_type = cl_device_info;
+		using exception_type = DeviceException;
+
+		static decltype(auto) func_release(cl_device_id id) {
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 			error::handle<DeviceException>(clReleaseDevice(id), error_map);
 #endif
 		}
 
-		static decltype(auto) retain(cl_device_id id) {
+		static decltype(auto) func_retain(cl_device_id id) {
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)
 			error::handle<DeviceException>(clRetainDevice(id), error_map);
 #endif
 		}
 
-		static decltype(auto) get_info
+		static decltype(auto) func_info
 		(
 			cl_device_id device,
 			cl_device_info param_name,
@@ -43,7 +47,7 @@ namespace cl {
 		}
 	};
 
-	class Device final : public Object<cl_device_id, cl_device_info, DeviceFunctions, DeviceException> {
+	class Device final : public Object<DeviceInfo> {
 	public:
 		Device(cl_device_id id);
 

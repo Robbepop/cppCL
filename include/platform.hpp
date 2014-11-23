@@ -10,10 +10,15 @@ namespace cl {
 	class Device;
 	class PlatformException;
 
-	struct PlatformFunctions final {
-		static decltype(auto) release(cl_platform_id) { return; }
-		static decltype(auto) retain(cl_platform_id) { return; }
-		static decltype(auto) get_info
+	struct PlatformInfo final {
+	public:
+		using cl_type = cl_platform_id;
+		using info_type = cl_platform_info;
+		using exception_type = PlatformException;
+
+		static decltype(auto) func_release(cl_platform_id) { return; }
+		static decltype(auto) func_retain(cl_platform_id) { return; }
+		static decltype(auto) func_info
 		(
 			cl_platform_id platform,
 			cl_platform_info param_name,
@@ -26,7 +31,7 @@ namespace cl {
 		}
 	};
 
-	class Platform final : public Object<cl_platform_id, cl_platform_info, PlatformFunctions, PlatformException> {
+	class Platform final : public Object<PlatformInfo> {
 	public:
 		static std::vector<Platform> getPlatforms();
 

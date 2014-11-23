@@ -5,7 +5,7 @@
 #include <map>
 
 namespace cl {
-	const error::ErrorMap ContextFunctions::error_map = {
+	const error::ErrorMap ContextInfo::error_map = {
 		{ErrorCode::invalid_context, "the given context is invalid."}
 	};
 

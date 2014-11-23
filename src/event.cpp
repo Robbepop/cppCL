@@ -4,6 +4,10 @@
 #include <type_traits>
 
 namespace cl {
+	const error::ErrorMap EventInfo::error_map = {
+		{ErrorCode::invalid_event, "the given event is invalid."}
+	};
+
 	Event::Event(cl_event event_id) :
 		Object{event_id}
 	{}

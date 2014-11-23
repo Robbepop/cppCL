@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace cl {
-	const error::ErrorMap DeviceFunctions::error_map = {
+	const error::ErrorMap DeviceInfo::error_map = {
 		{ErrorCode::invalid_device, "device is not a valid sub-device."}
 	};
 

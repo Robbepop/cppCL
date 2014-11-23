@@ -21,20 +21,24 @@ namespace cl {
 	class Device;
 	class Event;
 
-	struct CommandQueueFunctions final {
+	struct CommandQueueInfo final {
 	private:
 		static const error::ErrorMap error_map;
 
 	public:
-		static decltype(auto) release(cl_command_queue id) {
+		using cl_type = cl_command_queue;
+		using info_type = cl_command_queue_info;
+		using exception_type = CommandQueueException;
+
+		static decltype(auto) func_release(cl_command_queue id) {
 			error::handle<CommandQueueException>(clReleaseCommandQueue(id), error_map);
 		}
 
-		static decltype(auto) retain(cl_command_queue id) {
+		static decltype(auto) func_retain(cl_command_queue id) {
 			error::handle<CommandQueueException>(clRetainCommandQueue(id), error_map);
 		}
 
-		static decltype(auto) get_info
+		static decltype(auto) func_info
 		(
 			cl_command_queue context,
 			cl_command_queue_info param_name,
@@ -48,7 +52,7 @@ namespace cl {
 	};
 
 	class CommandQueue final :
-		public Object<cl_command_queue, cl_command_queue_info, CommandQueueFunctions, CommandQueueException>
+		public Object<CommandQueueInfo>
 	{
 	private:
 		struct operation final {
@@ -1124,6 +1128,12 @@ namespace cl {
 #endif
 
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		Event migrateMemoryObject(
+			std::vector<MemoryObject> const& memory_objects,
+			cl_mem_migration_flags flags,
+			std::vector<Event> const& event_wait_list
+		); // TODO
+
 		/////////////////////////////////////////////////////////////////////////
 		/// FILL BUFFER - BEGIN
 		/////////////////////////////////////////////////////////////////////////
@@ -1176,31 +1186,33 @@ clGetSupportedImageFormats (Context)
 	clCreateBuffer (Buffer)
 	clCreateSubBuffer (Buffer)	
 	clGetMemObjectInfo (MemoryObject)
+
 clGetImageInfo (Image)
 clRetainMemObject (MemoryObject)
 clReleaseMemObject (MemoryObject)
-clSetMemObjectDestructorCallback (MemoryObject)
+clSetMemObjectDestructorCallback (MemoryObject) (OpenCL 1.1)
 
-clEnqueueReadBuffer
-clEnqueueWriteBuffer
-clEnqueueReadBufferRect
-clEnqueueWriteBufferRect
-clEnqueueFillBuffer
-clEnqueueCopyBuffer
-clEnqueueCopyBufferRect
-clEnqueueMapBuffer
+	clEnqueueReadBuffer
+	clEnqueueWriteBuffer
+	clEnqueueReadBufferRect
+	clEnqueueWriteBufferRect
+	clEnqueueFillBuffer
+	clEnqueueCopyBuffer
+	clEnqueueCopyBufferRect
+	clEnqueueMapBuffer
 
+TODO: all image enqueue functions
 clEnqueueReadImage
 clEnqueueWriteImage
 clEnqueueFillImage
 clEnqueueCopyImage
 clEnqueueMapImage
 
-clEnqueueUnmapMemObject
-clEnqueueMigrateMemObjects
+clEnqueueCopyImageToBuffer (OpenCL 1.0) - TODO
+clEnqueueCopyBufferToImage (OpenCL 1.0) - TODO
+clEnqueueMigrateMemObjects (OpenCL 1.2) - TODO
 
-clEnqueueCopyImageToBuffer
-clEnqueueCopyBufferToImage
+	clEnqueueUnmapMemObject (not required)
 */
 
 #endif

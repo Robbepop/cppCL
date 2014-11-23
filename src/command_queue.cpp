@@ -2,6 +2,10 @@
 #include "error_handler.hpp"
 
 namespace cl {
+	const error::ErrorMap CommandQueueInfo::error_map = {
+		{ErrorCode::invalid_command_queue, "the given command queue is invalid."}
+	};
+
 	CommandQueue::CommandQueue(cl_command_queue command_queue_id) :
 		Object{command_queue_id}
 	{}

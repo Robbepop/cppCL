@@ -20,11 +20,11 @@ CFLAGS := -g -Wall -Wextra -pedantic -std=c++14 -fdiagnostics-color=auto
 #######################################
 # Directories
 #######################################
-SRCDIR := src
-BUILDDIR := build
-INCLUDEDIR := include
-BINDIR := bin
-TESTDIR := test
+DIR_SRC := src
+DIR_BUILD := build
+DIR_INCLUDE := include
+DIR_BIN := bin
+DIR_TEST := test
 
 #######################################
 # File Extensions
@@ -36,12 +36,12 @@ EXT_TEMPLATE := tcc
 #######################################
 # Targets
 #######################################
-TARGET_MAIN := $(BINDIR)/main
+TARGET_MAIN := $(DIR_BIN)/main
 
 #######################################
 # Includes & Libraries
 #######################################
-PATH_INC := -I$(INCLUDEDIR) -I/opt/AMDAPP/SDK/include
+PATH_INC := -I$(DIR_INCLUDE) -I/opt/AMDAPP/SDK/include
 PATH_LIB := -L/opt/AMDAPP/SDK/lib -lOpenCL
 
 #######################################
@@ -49,9 +49,9 @@ PATH_LIB := -L/opt/AMDAPP/SDK/lib -lOpenCL
 # files in src/ directory and all
 # object files in build/ directory.
 #######################################
-SRC_FILES := $(wildcard $(SRCDIR)/*.$(EXT_SRC))
-#OBJ_FILES := $(pathsubst $(SRCDIR)/%.$(EXT_SRC), $(BUILDDIR)/%.o, $(SRC_FILES))
-OBJ_FILES := $(addprefix $(BUILDDIR)/, $(notdir $(SRC_FILES:.$(EXT_SRC)=.o)))
+SRC_FILES := $(wildcard $(DIR_SRC)/*.$(EXT_SRC))
+#OBJ_FILES := $(pathsubst $(DIR_SRC)/%.$(EXT_SRC), $(DIR_BUILD)/%.o, $(SRC_FILES))
+OBJ_FILES := $(addprefix $(DIR_BUILD)/, $(notdir $(SRC_FILES:.$(EXT_SRC)=.o)))
 
 #######################################
 # linking of all object files
@@ -65,22 +65,22 @@ $(TARGET_MAIN): $(OBJ_FILES)
 # Compiling of all source files
 # within the given src directory.
 #######################################
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(EXT_SRC)
-	@mkdir -p $(BUILDDIR)
+$(DIR_BUILD)/%.o: $(DIR_SRC)/%.$(EXT_SRC)
+	@mkdir -p $(DIR_BUILD) $(DIR_BIN)
 	@echo " $(CC) $(CFLAGS) $(PATH_INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(PATH_INC) -c $< -o $@
 
 #######################################
 # Tests
 #######################################
 #tester:
-#	$(CC) $(CFLAGS) $(TESTDIR)/tester.$(EXT_SRC) $(PATH_INC) $(PATH_LIB) -o $(BINDIR)/tester
+#	$(CC) $(CFLAGS) $(DIR_TEST)/tester.$(EXT_SRC) $(PATH_INC) $(PATH_LIB) -o $(DIR_BIN)/tester
 
 #######################################
 # Clean
 #######################################
 clean:
 	@echo " Cleaning...";
-	@echo " $(RM) -r $(BUILDDIR) $(TARGET_MAIN)"; $(RM) -r $(BUILDDIR) $(TARGET_MAIN)
+	@echo " $(RM) -r $(DIR_BUILD) $(TARGET_MAIN)"; $(RM) -r $(DIR_BUILD) $(DIR_BIN)
 
 #######################################
 # PHONY declarations

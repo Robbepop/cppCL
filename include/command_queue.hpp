@@ -51,49 +51,93 @@ namespace cl {
 		public Object<cl_command_queue, cl_command_queue_info, CommandQueueFunctions, CommandQueueException>
 	{
 	private:
-		struct read_operation final {
-			using convert_type = void*;
-			static decltype(auto) func(
-				cl_command_queue command_queue,
-				cl_mem buffer,
-				cl_bool blocking_read,
-				size_t offset,
-				size_t size,
-				void *ptr,
-				cl_uint num_events_in_wait_list,
-				const cl_event *event_wait_list,
-				cl_event *event
-			) {
-				return clEnqueueReadBuffer(
-					command_queue, buffer, blocking_read, offset, size, ptr,
-					num_events_in_wait_list, event_wait_list, event
-				);
-			}
+		struct operation final {
+			struct read final {
+				using convert_type = void*;
+				static decltype(auto) func(
+					cl_command_queue command_queue,
+					cl_mem buffer,
+					cl_bool blocking_read,
+					size_t offset,
+					size_t size,
+					void *ptr,
+					cl_uint num_events_in_wait_list,
+					const cl_event *event_wait_list,
+					cl_event *event
+				) {
+					return clEnqueueReadBuffer(
+						command_queue, buffer, blocking_read, offset, size, ptr,
+						num_events_in_wait_list, event_wait_list, event
+					);
+				}
+				static decltype(auto) func_rect(
+					cl_command_queue command_queue, cl_mem buffer, cl_bool blocking,
+					size_t const* buffer_origin, size_t const* host_origin, size_t const* region,
+					size_t buffer_row_pitch, size_t buffer_slice_pitch,
+					size_t host_row_pitch, size_t host_slice_pitch,
+					void * ptr,
+					cl_uint num_events_in_wait_list, cl_event const* event_wait_list,
+					cl_event * event
+				) {
+					return clEnqueueReadBufferRect(
+						command_queue, buffer, blocking,
+						buffer_origin, host_origin, region,
+						buffer_row_pitch, buffer_slice_pitch,
+						host_row_pitch, host_slice_pitch,
+						ptr,
+						num_events_in_wait_list, event_wait_list,
+						event
+					);
+				}
+			};
+
+			struct write final {
+				using convert_type = const void*;
+				static decltype(auto) func(
+					cl_command_queue command_queue,
+					cl_mem buffer,
+					cl_bool blocking_write,
+					size_t offset,
+					size_t size,
+					const void *ptr,
+					cl_uint num_events_in_wait_list,
+					const cl_event *event_wait_list,
+					cl_event *event
+				) {
+					return clEnqueueWriteBuffer(
+						command_queue, buffer, blocking_write, offset, size, ptr,
+						num_events_in_wait_list, event_wait_list, event
+					);
+				}
+				static decltype(auto) func_rect(
+					cl_command_queue command_queue, cl_mem buffer, cl_bool blocking,
+					size_t const* buffer_origin, size_t const* host_origin, size_t const* region,
+					size_t buffer_row_pitch, size_t buffer_slice_pitch,
+					size_t host_row_pitch, size_t host_slice_pitch,
+					void * ptr,
+					cl_uint num_events_in_wait_list, cl_event const* event_wait_list,
+					cl_event * event
+				) {
+					return clEnqueueWriteBufferRect(
+						command_queue, buffer, blocking,
+						buffer_origin, host_origin, region,
+						buffer_row_pitch, buffer_slice_pitch,
+						host_row_pitch, host_slice_pitch,
+						ptr,
+						num_events_in_wait_list, event_wait_list,
+						event
+					);
+				}
+			};
 		};
 
-		struct write_operation final {
-			using convert_type = const void*;
-			static decltype(auto) func(
-				cl_command_queue command_queue,
-				cl_mem buffer,
-				cl_bool blocking_write,
-				size_t offset,
-				size_t size,
-				const void *ptr,
-				cl_uint num_events_in_wait_list,
-				const cl_event *event_wait_list,
-				cl_event *event
-			) {
-				return clEnqueueWriteBuffer(
-					command_queue, buffer, blocking_write, offset, size, ptr,
-					num_events_in_wait_list, event_wait_list, event
-				);
-			}
-		};
 
+		/////////////////////////////////////////////////////////////////////////
+		/// READ/WRITE BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 		template <typename DataType, CommandSync Sync, typename Operation, typename Iterator>
-		typename std::conditional<static_cast<cl_bool>(Sync), void, Event>::type
-		enqueueReadWrite(
+		typename std::conditional<Sync == CommandSync::blocking, void, Event>::type
+		enqueueReadWriteBuffer(
 			Buffer<DataType> const& buffer,
 			Iterator first,
 			Iterator last,
@@ -109,16 +153,16 @@ namespace cl {
 			);
 			static_assert(
 				std::is_same<typename std::iterator_traits<Iterator>::value_type, DataType>::value,
-				"interators have to iterate through the same data type as buffer stores."
+				"iterators have to iterate through the same data type as buffer stores."
 			);
 			static_assert(
 				std::is_trivial<DataType>::value,
 				"iterator's and buffer's data type has to be trivial."
 			);
 			static_assert(
-				std::is_same<Operation, read_operation>::value ||
-				std::is_same<Operation, write_operation>::value,
-				"Operation template parameter can only be of type read_operation or write_operation!"
+				std::is_same<Operation, operation::read>::value ||
+				std::is_same<Operation, operation::write>::value,
+				"operation template parameter can only be of type operation::read or operation::write!"
 			);
 			assert(first <= last);
 			static const auto error_map = error::ErrorMap{
@@ -132,9 +176,9 @@ namespace cl {
 				{ErrorCode::memory_object_allocation_failure, "failed to allocate memory for data store associated with the given buffer."},
 				{ErrorCode::invalid_operation, "can not read from buffer which has been created with write only or host-no-access attributes."}
 			};
+			const auto num_events = (events_in_wait_list != nullptr) ? events_in_wait_list->size() : 0;
+			const auto count_elements = static_cast<size_t>(std::distance(first, last));
 			if (Sync == CommandSync::blocking) {
-				const auto num_events = (events_in_wait_list != nullptr) ? events_in_wait_list->size() : 0;
-				const auto count_elements = static_cast<size_t>(std::distance(first, last));
 				const auto error = Operation::func(
 					m_id,
 					buffer.id(),
@@ -149,8 +193,6 @@ namespace cl {
 				error::handle<CommandQueueException>(error, error_map);
 			} else {
 				auto event_id = cl_event{};
-				const auto num_events = (events_in_wait_list != nullptr) ? events_in_wait_list->size() : 0;
-				const auto count_elements = static_cast<size_t>(std::distance(first, last));
 				const auto error = Operation::func(
 					m_id,
 					buffer.id(),
@@ -166,7 +208,14 @@ namespace cl {
 				return {event_id};
 			}
 		}
+		/////////////////////////////////////////////////////////////////////////
+		/// READ/WRITE BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 
+
+		/////////////////////////////////////////////////////////////////////////
+		/// COPY BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 		template <typename DataType>
 		Event enqueueCopyBuffer(
 			Buffer<DataType> src,
@@ -199,7 +248,14 @@ namespace cl {
 			error::handle<CommandQueueException>(error, error_map);
 			return {event_id};
 		}
+		/////////////////////////////////////////////////////////////////////////
+		/// COPY BUFFER - END
+		/////////////////////////////////////////////////////////////////////////
 
+
+		/////////////////////////////////////////////////////////////////////////
+		/// MAP BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 		template <typename DataType>
 		MappedBuffer<DataType> enqueueMapBuffer(
 			Buffer<DataType> buffer,
@@ -243,15 +299,122 @@ namespace cl {
 			error::handle<CommandQueueException>(error, error_map);
 			return MappedBuffer<DataType>(*this, buffer, Event(event_id), ptr, count_elems);
 		}
+		/////////////////////////////////////////////////////////////////////////
+		/// MAP BUFFER - END
+		/////////////////////////////////////////////////////////////////////////
+
 
 #if defined(CPPCL_CL_VERSION_1_1_ENABLED)
-		template <typename DataType>
+		/////////////////////////////////////////////////////////////////////////
+		/// READ/WRITE BUFFER RECT - BEGIN
+		/////////////////////////////////////////////////////////////////////////
+		template <
+			typename DataType,
+			typename Iterator,
+			typename Operation,
+			size_t N,
+			CommandSync Sync
+		> typename std::conditional<Sync == CommandSync::blocking, void, Event>::type
+		enqueueReadWriteBufferRect(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch,
+			size_t buffer_slice_pitch,
+			size_t host_row_pitch,
+			size_t host_slice_pitch,
+			std::vector<Event> const* event_wait_list
+		) {
+			static_assert(
+				std::is_same<
+					typename std::iterator_traits<Iterator>::iterator_category,
+					std::random_access_iterator_tag
+				>::value,
+				"first has to be a random access iterator."
+			);
+			static_assert(
+				std::is_same<typename std::iterator_traits<Iterator>::value_type, DataType>::value,
+				"the given iterator has to iterate over the same data type as buffer stores."
+			);
+			static_assert(
+				std::is_trivial<DataType>::value,
+				"iterator's and buffer's data type has to be trivial."
+			);
+			static_assert(
+				std::is_same<Operation, operation::read>::value ||
+				std::is_same<Operation, operation::write>::value,
+				"operation template parameter can only be of type operation::read or operation::write!"
+			);
+			static const auto error_map = error::ErrorMap{
+				{ErrorCode::invalid_command_queue, "the command queue object is invalid."},
+				{ErrorCode::invalid_context, "the context associated with this command queue and the given buffer are not the same."},
+				{ErrorCode::invalid_memory_object, "the given buffer is invalid."},
+				{ErrorCode::invalid_value, "specified offsets and regions to access invalid data out of bounds of the buffer areas; OR if any element in region is null; OR if any given pitch value is invalid."},
+				{ErrorCode::invalid_event_wait_list, "one or more event objects in the given event list are invalid."},
+				{ErrorCode::misaligned_sub_buffer_offset, "the given sub-buffer and offset is not aligned to CL_DEVICE_MEM_BASE_ADDR_ALIGN value for the device associated with this command queue."},		
+				{ErrorCode::execute_status_error_for_events_in_wait_list, "read and write operations are blocking and there is one or more event in the given event list with an invalid status."},
+				{ErrorCode::memory_object_allocation_failure, "failed to allocate memory for data store associated with the given buffer."},
+				{ErrorCode::invalid_operation, "can not read from buffer which has been created with write only or host-no-access attributes."}
+			};
+			const auto data_size = sizeof(DataType);
+			auto buffer_off_cplt = std::array<size_t, 3>{ {0, 0, 0} };
+			auto host_off_cplt   = std::array<size_t, 3>{ {0, 0, 0} };
+			auto region_cplt     = std::array<size_t, 3>{ {1, 1, 1} };
+			for (int n = 0; n < N; ++n) {
+				buffer_off_cplt[n] = buffer_offset[n] * data_size;
+				host_off_cplt[n]   = host_offset[n] * data_size;
+				region_cplt[n]     = region[n];
+			}
+			const auto num_events = (event_wait_list != nullptr)
+				? event_wait_list->size()
+				: 0;
+			auto events = (event_wait_list != nullptr)
+				? reinterpret_cast<const cl_event*>(event_wait_list->data())
+				: nullptr;
+			auto first_addr = reinterpret_cast<void*>(std::addressof(*first));
+			if (Sync == CommandSync::blocking) {
+				const auto error = Operation::func_rect(
+					m_id, buffer.id(), true,
+					buffer_off_cplt.data(), host_off_cplt.data(), region_cplt.data(),
+					buffer_row_pitch, buffer_slice_pitch,
+					host_row_pitch, host_slice_pitch,
+					first_addr,
+					num_events, events,
+					nullptr
+				);
+				error::handle<CommandQueueException>(error, error_map);
+			} else {
+				auto event_id = cl_event{};
+				const auto error = Operation::func_rect(
+					m_id, buffer.id(), false,
+					buffer_off_cplt.data(), host_off_cplt.data(), region_cplt.data(),
+					buffer_row_pitch, buffer_slice_pitch,
+					host_row_pitch, host_slice_pitch,
+					first_addr,
+					num_events, events,
+					std::addressof(event_id)
+				);
+				error::handle<CommandQueueException>(error, error_map);
+				return {event_id};
+			}
+		}
+		/////////////////////////////////////////////////////////////////////////
+		/// READ/WRITE BUFFER RECT - END
+		/////////////////////////////////////////////////////////////////////////
+
+
+		/////////////////////////////////////////////////////////////////////////
+		/// COPY BUFFER RECT - BEGIN
+		/////////////////////////////////////////////////////////////////////////
+		template <typename DataType, size_t N>
 		Event enqueueCopyBufferRect(
 			Buffer<DataType> const& src,
 			Buffer<DataType> const& dst,
-			size_t const* src_offset_ptr,
-			size_t const* dst_offset_ptr,
-			size_t const* dimensions_ptr,
+			std::array<size_t, N> const& src_off,
+			std::array<size_t, N> const& dst_off,
+			std::array<size_t, N> const& regions,
 			size_t src_row_pitch,
 			size_t src_slice_pitch,
 			size_t dst_row_pitch,
@@ -267,11 +430,29 @@ namespace cl {
 				{ErrorCode::misaligned_sub_buffer_offset, "src or dst buffers are subbuffers with invalid alignment."},
 				{ErrorCode::memory_object_allocation_failure, "failed to allocate memory for data store associated with src or dst."}
 			};
-			auto event_id = cl_event{0};
+			const auto data_size = sizeof(DataType);
+			auto src_off_cplt = std::array<size_t, 3>{ {0, 0, 0} };
+			auto dst_off_cplt = std::array<size_t, 3>{ {0, 0, 0} };
+			auto regions_cplt = std::array<size_t, 3>{ {1, 1, 1} };
+			/*
+			std::copy_n(src_off.begin(), N, src_off_cplt);
+			std::copy_n(dst_off.begin(), N, dst_off_cplt);
+			std::copy_n(regions.begin(), N, regions_cplt);
+			const auto elements_to_bytes = [data_size](size_t elements) { return elements * data_size; };
+			std::transform(src_off_cplt.begin(), src_off_cplt.end(), src_off_cplt.begin(), elements_to_bytes);
+			std::transform(dst_off_cplt.begin(), dst_off_cplt.end(), dst_off_cplt.begin(), elements_to_bytes);
+			std::transform(regions_cplt.begin(), regions_cplt.end(), regions_cplt.begin(), elements_to_bytes);
+			*/
+			for (int n = 0; n < N; ++n) {
+				src_off_cplt[n] = src_off[n] * data_size;
+				dst_off_cplt[n] = dst_off[n] * data_size;
+				regions_cplt[n] = regions[n];
+			}
 			const auto num_events = (event_wait_list != nullptr) ? event_wait_list->size() : 0;
+			auto event_id = cl_event{0};
 			auto error = clEnqueueCopyBufferRect(
 				m_id, src.id(), dst.id(),
-				src_offset_ptr, dst_offset_ptr, dimensions_ptr,
+				src_off_cplt.data(), dst_off_cplt.data(), regions_cplt.data(),
 				src_row_pitch, src_slice_pitch,
 				dst_row_pitch, dst_slice_pitch,
 				num_events,
@@ -281,107 +462,15 @@ namespace cl {
 			error::handle<CommandQueueException>(error, error_map);
 			return {event_id};
 		}
-
-		template <typename DataType, size_t N>
-		typename std::enable_if<N == 1, Event>::type		
-		enqueueCopyBufferRect(
-			Buffer<DataType> const& src,
-			Buffer<DataType> const& dst,
-			std::array<size_t, N> const& src_offset,
-			std::array<size_t, N> const& dst_offset,
-			std::array<size_t, N> const& dimensions,
-			size_t src_row_pitch,
-			size_t src_slice_pitch,
-			size_t dst_row_pitch,
-			size_t dst_slice_pitch,
-			std::vector<Event> const* event_wait_list
-		) {
-			const auto data_size = sizeof(DataType);
-			const auto src_offset_complete = std::array<size_t, 3>{
-				src_offset[0] * data_size, 0, 0
-			};
-			const auto dst_offset_complete = std::array<size_t, 3>{
-				dst_offset[0] * data_size, 0, 0
-			};
-			const auto dimensions_complete = std::array<size_t, 3>{
-				dimensions[0] * data_size, 1, 1
-			};
-			return enqueueCopyBufferRect<DataType>(
-				src, dst,
-				std::addressof(src_offset_complete),
-				std::addressof(dst_offset_complete),
-				std::addressof(dimensions_complete),
-				src_row_pitch, src_slice_pitch,
-				dst_row_pitch, dst_slice_pitch,
-				event_wait_list
-			);
-		}
-
-		template <typename DataType, size_t N>
-		typename std::enable_if<N == 2, Event>::type		
-		enqueueCopyBufferRect(
-			Buffer<DataType> const& src,
-			Buffer<DataType> const& dst,
-			std::array<size_t, N> const& src_offset,
-			std::array<size_t, N> const& dst_offset,
-			std::array<size_t, N> const& dimensions,
-			size_t src_row_pitch,
-			size_t src_slice_pitch,
-			size_t dst_row_pitch,
-			size_t dst_slice_pitch,
-			std::vector<Event> const* event_wait_list
-		) {
-			const auto data_size = sizeof(DataType);
-			const auto src_offset_complete = std::array<size_t, 3>{
-				src_offset[0] * data_size, src_offset[1] * data_size, 0
-			};
-			const auto dst_offset_complete = std::array<size_t, 3>{
-				dst_offset[0] * data_size, dst_offset[1] * data_size, 0
-			};
-			const auto dimensions_complete = std::array<size_t, 3>{
-				dimensions[0] * data_size, dimensions[1] * data_size, 1
-			};
-			return enqueueCopyBufferRect<DataType>(
-				src, dst,
-				std::addressof(src_offset_complete),
-				std::addressof(dst_offset_complete),
-				std::addressof(dimensions_complete),
-				src_row_pitch, src_slice_pitch,
-				dst_row_pitch, dst_slice_pitch,
-				event_wait_list
-			);
-		}
-
-		template <typename DataType, size_t N>
-		typename std::enable_if<N == 3, Event>::type		
-		enqueueCopyBufferRect(
-			Buffer<DataType> const& src,
-			Buffer<DataType> const& dst,
-			std::array<size_t, N> const& src_offset,
-			std::array<size_t, N> const& dst_offset,
-			std::array<size_t, N> const& dimensions,
-			size_t src_row_pitch,
-			size_t src_slice_pitch,
-			size_t dst_row_pitch,
-			size_t dst_slice_pitch,
-			std::vector<Event> const* event_wait_list
-		) {
-			std::for_each(begin(src_offset), end(src_offset), [](DataType& value) {value *= sizeof(DataType);});
-			std::for_each(begin(dst_offset), end(dst_offset), [](DataType& value) {value *= sizeof(DataType);});
-			std::for_each(begin(dimensions), end(dimensions), [](DataType& value) {value *= sizeof(DataType);});
-			return enqueueCopyBufferRect<DataType>(
-				src, dst,
-				std::addressof(src_offset),
-				std::addressof(dst_offset),
-				std::addressof(dimensions),
-				src_row_pitch, src_slice_pitch,
-				dst_row_pitch, dst_slice_pitch,
-				event_wait_list
-			);
-		}
+		/////////////////////////////////////////////////////////////////////////
+		/// COPY BUFFER RECT - END
+		/////////////////////////////////////////////////////////////////////////
 #endif
 
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		/////////////////////////////////////////////////////////////////////////
+		/// FILL BUFFER - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 		template <typename DataType>
 		Event enqueueFillBuffer(
 			Buffer<DataType> const& buffer,
@@ -417,6 +506,9 @@ namespace cl {
 			error::handle<CommandQueueException>(error, error_map);
 			return {event_id};
 		}
+		/////////////////////////////////////////////////////////////////////////
+		/// FILL BUFFER - END
+		/////////////////////////////////////////////////////////////////////////
 #endif
 
 	public:
@@ -439,7 +531,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			enqueueReadWrite<DataType, CommandSync::blocking, read_operation, Iterator>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::read, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -452,7 +544,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueReadWrite<DataType, CommandSync::async, read_operation, Iterator>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::read, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -464,7 +556,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			enqueueReadWrite<DataType, CommandSync::blocking, read_operation, Iterator>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::read, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -476,7 +568,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			return enqueueReadWrite<DataType, CommandSync::async, read_operation, Iterator>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::read, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -489,7 +581,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, CommandSync::blocking, read_operation>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::read>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -502,7 +594,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, CommandSync::async, read_operation>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::read>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -514,7 +606,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, CommandSync::blocking, read_operation>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::read>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}
@@ -526,7 +618,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, CommandSync::async, read_operation>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::read>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}
@@ -546,7 +638,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			enqueueReadWrite<DataType, CommandSync::blocking, write_operation, Iterator>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::write, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -559,7 +651,7 @@ namespace cl {
 			size_t buffer_offset,
 			std::vector<Event> const& events_in_wait_list
 		) {
-			return enqueueReadWrite<DataType, CommandSync::async, write_operation, Iterator>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::write, Iterator>(
 				buffer, first, last, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -571,7 +663,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			enqueueReadWrite<DataType, CommandSync::blocking, write_operation, Iterator>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::write, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -583,7 +675,7 @@ namespace cl {
 			Iterator last,
 			size_t buffer_offset = 0
 		) {
-			return enqueueReadWrite<DataType, CommandSync::async, write_operation, Iterator>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::write, Iterator>(
 				buffer, first, last, buffer_offset, nullptr
 			);
 		}
@@ -596,7 +688,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, CommandSync::blocking, write_operation>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::write>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -609,7 +701,7 @@ namespace cl {
 			std::vector<Event> const& events_in_wait_list
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, CommandSync::async, write_operation>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::write>(
 				buffer, addr, addr + 1, buffer_offset, std::addressof(events_in_wait_list)
 			);
 		}
@@ -621,7 +713,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			enqueueReadWrite<DataType, CommandSync::blocking, write_operation>(
+			enqueueReadWriteBuffer<DataType, CommandSync::blocking, operation::write>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}
@@ -633,7 +725,7 @@ namespace cl {
 			size_t buffer_offset = 0
 		) {
 			const auto addr = std::addressof(element);
-			return enqueueReadWrite<DataType, CommandSync::async, write_operation>(
+			return enqueueReadWriteBuffer<DataType, CommandSync::async, operation::write>(
 				buffer, addr, addr + 1, buffer_offset, nullptr
 			);
 		}
@@ -778,16 +870,110 @@ namespace cl {
 		/////////////////////////////////////////////////////////////////////////
 
 #if defined(CPPCL_CL_VERSION_1_1_ENABLED)
-		Event enqueueReadBufferRect();
 		Event enqueueWriteBufferRect();
 
+		/////////////////////////////////////////////////////////////////////////
+		/// READ BUFFER RECT - BEGIN
+		/////////////////////////////////////////////////////////////////////////
+		template <typename DataType, typename Iterator, size_t N>
+		void enqueueReadBufferRect(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch,
+			size_t buffer_slice_pitch,
+			size_t host_row_pitch,
+			size_t host_slice_pitch,
+			std::vector<Event> const& event_wait_list
+		) {
+			enqueueReadWriteBufferRect<DataType, Iterator, operation::read, N, CommandSync::blocking>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				std::addressof(event_wait_list)
+			);
+		}
+
+		template <typename DataType, typename Iterator, size_t N>
+		Event enqueueReadBufferRectAsync(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch,
+			size_t buffer_slice_pitch,
+			size_t host_row_pitch,
+			size_t host_slice_pitch,
+			std::vector<Event> const& event_wait_list
+		) {
+			return enqueueReadWriteBufferRect<DataType, Iterator, operation::read, N, CommandSync::async>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				std::addressof(event_wait_list)
+			);
+		}
+
+		template <typename DataType, typename Iterator, size_t N>
+		void enqueueReadBufferRect(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch = 0,
+			size_t buffer_slice_pitch = 0,
+			size_t host_row_pitch = 0,
+			size_t host_slice_pitch = 0
+		) {
+			enqueueReadWriteBufferRect<DataType, Iterator, operation::read, N, CommandSync::blocking>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				nullptr
+			);
+		}
+
+		template <typename DataType, typename Iterator, size_t N>
+		Event enqueueReadBufferRectAsync(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch = 0,
+			size_t buffer_slice_pitch = 0,
+			size_t host_row_pitch = 0,
+			size_t host_slice_pitch = 0
+		) {
+			return enqueueReadWriteBufferRect<DataType, Iterator, operation::read, N, CommandSync::async>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				nullptr
+			);
+		}
+		/////////////////////////////////////////////////////////////////////////
+		/// READ BUFFER RECT - END
+		/////////////////////////////////////////////////////////////////////////
+
+		/////////////////////////////////////////////////////////////////////////
+		/// COPY BUFFER RECT - BEGIN
+		/////////////////////////////////////////////////////////////////////////
 		template <typename DataType, size_t N>
 		Event enqueueCopyBufferRect(
 			Buffer<DataType> const& src,
 			Buffer<DataType> const& dst,
 			std::array<size_t, N> const& src_offset,
 			std::array<size_t, N> const& dst_offset,
-			std::array<size_t, N> const& dimensions,
+			std::array<size_t, N> const& region,
 			size_t src_row_pitch,
 			size_t src_slice_pitch,
 			size_t dst_row_pitch,
@@ -796,7 +982,7 @@ namespace cl {
 		) {
 			return enqueueCopyBufferRect<DataType, N>(
 				src, dst,
-				src_offset, dst_offset, dimensions,
+				src_offset, dst_offset, region,
 				src_row_pitch, src_slice_pitch,
 				dst_row_pitch, dst_slice_pitch,
 				std::addressof(event_wait_list)
@@ -809,7 +995,7 @@ namespace cl {
 			Buffer<DataType> const& dst,
 			std::array<size_t, N> const& src_offset,
 			std::array<size_t, N> const& dst_offset,
-			std::array<size_t, N> const& dimensions,
+			std::array<size_t, N> const& region,
 			size_t src_row_pitch = 0,
 			size_t src_slice_pitch = 0,
 			size_t dst_row_pitch = 0,
@@ -817,7 +1003,7 @@ namespace cl {
 		) {
 			return enqueueCopyBufferRect<DataType, N>(
 				src, dst,
-				src_offset, dst_offset, dimensions,
+				src_offset, dst_offset, region,
 				src_row_pitch, src_slice_pitch,
 				dst_row_pitch, dst_slice_pitch,
 				nullptr
@@ -830,16 +1016,19 @@ namespace cl {
 			Buffer<DataType> const& dst,
 			std::array<size_t, N> const& src_offset,
 			std::array<size_t, N> const& dst_offset,
-			std::array<size_t, N> const& dimensions,
+			std::array<size_t, N> const& region,
 			std::vector<Event> const& event_wait_list
 		) {
 			return enqueueCopyBufferRect<DataType, N>(
 				src, dst,
-				src_offset, dst_offset, dimensions,
+				src_offset, dst_offset, region,
 				0, 0, 0, 0,
 				std::addressof(event_wait_list)
 			);
 		}
+		/////////////////////////////////////////////////////////////////////////
+		/// COPY BUFFER RECT - END
+		/////////////////////////////////////////////////////////////////////////
 #endif
 
 #if defined(CPPCL_CL_VERSION_1_2_ENABLED)

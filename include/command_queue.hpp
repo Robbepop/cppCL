@@ -870,8 +870,6 @@ namespace cl {
 		/////////////////////////////////////////////////////////////////////////
 
 #if defined(CPPCL_CL_VERSION_1_1_ENABLED)
-		Event enqueueWriteBufferRect();
-
 		/////////////////////////////////////////////////////////////////////////
 		/// READ BUFFER RECT - BEGIN
 		/////////////////////////////////////////////////////////////////////////
@@ -963,6 +961,100 @@ namespace cl {
 		/////////////////////////////////////////////////////////////////////////
 		/// READ BUFFER RECT - END
 		/////////////////////////////////////////////////////////////////////////
+
+
+		/////////////////////////////////////////////////////////////////////////
+		/// WRITE BUFFER RECT - BEGIN
+		/////////////////////////////////////////////////////////////////////////
+		template <typename DataType, typename Iterator, size_t N>
+		void enqueueWriteBufferRect(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch,
+			size_t buffer_slice_pitch,
+			size_t host_row_pitch,
+			size_t host_slice_pitch,
+			std::vector<Event> const& event_wait_list
+		) {
+			enqueueReadWriteBufferRect<DataType, Iterator, operation::write, N, CommandSync::blocking>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				std::addressof(event_wait_list)
+			);
+		}
+
+		template <typename DataType, typename Iterator, size_t N>
+		Event enqueueWriteBufferRectAsync(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch,
+			size_t buffer_slice_pitch,
+			size_t host_row_pitch,
+			size_t host_slice_pitch,
+			std::vector<Event> const& event_wait_list
+		) {
+			return enqueueReadWriteBufferRect<DataType, Iterator, operation::write, N, CommandSync::async>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				std::addressof(event_wait_list)
+			);
+		}
+
+		template <typename DataType, typename Iterator, size_t N>
+		void enqueueWriteBufferRect(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch = 0,
+			size_t buffer_slice_pitch = 0,
+			size_t host_row_pitch = 0,
+			size_t host_slice_pitch = 0
+		) {
+			enqueueReadWriteBufferRect<DataType, Iterator, operation::write, N, CommandSync::blocking>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				nullptr
+			);
+		}
+
+		template <typename DataType, typename Iterator, size_t N>
+		Event enqueueWriteBufferRectAsync(
+			Buffer<DataType> const& buffer,
+			Iterator first,
+			std::array<size_t, N> const& buffer_offset,
+			std::array<size_t, N> const& host_offset,
+			std::array<size_t, N> const& region,
+			size_t buffer_row_pitch = 0,
+			size_t buffer_slice_pitch = 0,
+			size_t host_row_pitch = 0,
+			size_t host_slice_pitch = 0
+		) {
+			return enqueueReadWriteBufferRect<DataType, Iterator, operation::write, N, CommandSync::async>(
+				buffer, first,
+				buffer_offset, host_offset, region,
+				buffer_row_pitch, buffer_slice_pitch,
+				host_row_pitch, host_slice_pitch,
+				nullptr
+			);
+		}
+		/////////////////////////////////////////////////////////////////////////
+		/// WRITE BUFFER RECT - END
+		/////////////////////////////////////////////////////////////////////////
+
 
 		/////////////////////////////////////////////////////////////////////////
 		/// COPY BUFFER RECT - BEGIN
@@ -1076,5 +1168,39 @@ namespace cl {
 #endif
 	};
 }
+
+/*
+clGetSupportedImageFormats (Context)
+
+	clCreateImage (Image)
+	clCreateBuffer (Buffer)
+	clCreateSubBuffer (Buffer)	
+	clGetMemObjectInfo (MemoryObject)
+clGetImageInfo (Image)
+clRetainMemObject (MemoryObject)
+clReleaseMemObject (MemoryObject)
+clSetMemObjectDestructorCallback (MemoryObject)
+
+clEnqueueReadBuffer
+clEnqueueWriteBuffer
+clEnqueueReadBufferRect
+clEnqueueWriteBufferRect
+clEnqueueFillBuffer
+clEnqueueCopyBuffer
+clEnqueueCopyBufferRect
+clEnqueueMapBuffer
+
+clEnqueueReadImage
+clEnqueueWriteImage
+clEnqueueFillImage
+clEnqueueCopyImage
+clEnqueueMapImage
+
+clEnqueueUnmapMemObject
+clEnqueueMigrateMemObjects
+
+clEnqueueCopyImageToBuffer
+clEnqueueCopyBufferToImage
+*/
 
 #endif

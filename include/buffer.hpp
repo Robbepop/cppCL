@@ -1,5 +1,5 @@
-#ifndef __CL_BUFFER_HEADER
-#define __CL_BUFFER_HEADER
+#ifndef CPPCL_BUFFER_HEADER
+#define CPPCL_BUFFER_HEADER
 
 #include "memory_object.hpp"
 #include "error_handler.hpp"
@@ -21,7 +21,7 @@ namespace cl {
 			size_t count_elements,
 			DataType* host_ptr = nullptr
 		) :
-			MemoryObject{0}
+			MemoryObject{}
 		{
 			static const auto error_map = error::ErrorMap{
 				{ErrorCode::invalid_context, "the given context is invalid."},

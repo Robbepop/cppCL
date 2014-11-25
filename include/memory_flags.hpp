@@ -1,5 +1,5 @@
-#ifndef __CL_MEMORY_FLAGS_HEADER
-#define __CL_MEMORY_FLAGS_HEADER
+#ifndef CPPCL_MEMORY_FLAGS_HEADER
+#define CPPCL_MEMORY_FLAGS_HEADER
 
 #include "wrapper.hpp"
 

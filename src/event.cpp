@@ -13,7 +13,7 @@ namespace cl {
 	{}
 
 	Event::Event(Context const& context) :
-		Object{0}
+		Object{}
 	{
 		static const auto error_map = error::ErrorMap{
 			{ErrorCode::invalid_context, "the given context is invalid."}

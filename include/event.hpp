@@ -1,5 +1,5 @@
-#ifndef __CL_EVENT_HEADER
-#define __CL_EVENT_HEADER
+#ifndef CPPCL_EVENT_HEADER
+#define CPPCL_EVENT_HEADER
 
 #include "object.hpp"
 #include "context.hpp"

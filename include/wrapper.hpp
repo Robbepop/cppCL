@@ -1,7 +1,12 @@
-#ifndef __CL_WRAPPER_HEADER
-#define __CL_WRAPPER_HEADER
+#ifndef CPPCL_WRAPPER_HEADER
+#define CPPCL_WRAPPER_HEADER
 
-#ifdef __APPLE__
+//#define CPPCL_D3D10_SHARING
+//#define CPPCL_D3D11_SHARING
+//#define CPPCL_DX9_MEDIA_SHARING
+//#define CPPCL_OPENGL_SHARING
+
+#if defined(__APPLE__)
 #include <OpenCL/opencl.h>
 #else
 #include <CL/cl.h>
@@ -36,10 +41,10 @@
 
 namespace cl {
 	enum class AddressingMode : cl_addressing_mode {
-		none = CL_ADDRESS_NONE,
+		none          = CL_ADDRESS_NONE,
 		clamp_to_edge = CL_ADDRESS_CLAMP_TO_EDGE,
-		clamp = CL_ADDRESS_CLAMP,
-		repeat = CL_ADDRESS_REPEAT
+		clamp         = CL_ADDRESS_CLAMP,
+		repeat        = CL_ADDRESS_REPEAT
 	};
 
 	enum class BufferCreateType : cl_buffer_create_type {
@@ -47,66 +52,93 @@ namespace cl {
 	};
 
 	enum class BuildStatus : cl_build_status {
-		error = CL_BUILD_ERROR,
+		error       = CL_BUILD_ERROR,
 		in_progress = CL_BUILD_IN_PROGRESS,
-		none = CL_BUILD_NONE,
-		success = CL_BUILD_SUCCESS
+		none        = CL_BUILD_NONE,
+		success     = CL_BUILD_SUCCESS
 	};
 
 	enum class CommandSync : cl_bool {
 		blocking = CL_TRUE,
-		async = CL_FALSE
+		async    = CL_FALSE
 	};
 
 	enum class ChannelOrder : cl_channel_order {
-		a = CL_A,
-		r = CL_R,
-		rg = CL_RG,
-		ra = CL_RA,
-		rgb = CL_RGB,
-		rgba = CL_RGBA,
-		bgra = CL_BGRA,
-		argb = CL_ARGB,
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		rx        = CL_Rx,
+		rgx       = CL_RGx,
+		rgbx      = CL_RGBx,
+#endif
+		a         = CL_A,
+		r         = CL_R,
+		rg        = CL_RG,
+		ra        = CL_RA,
+		rgb       = CL_RGB,
+		rgba      = CL_RGBA,
+		bgra      = CL_BGRA,
+		argb      = CL_ARGB,
 		intensity = CL_INTENSITY,
 		luminance = CL_LUMINANCE
 	};
 
 	enum class ChannelType : cl_channel_type {
-		t_float = CL_FLOAT,
-		t_half_float = CL_HALF_FLOAT,
-		t_signed_int8 = CL_SIGNED_INT8,
-		t_signed_int16 = CL_SIGNED_INT16,
-		t_signed_int32 = CL_SIGNED_INT32,
-		t_unsigned_int8 = CL_UNSIGNED_INT8,
-		t_unsigned_int16 = CL_UNSIGNED_INT16,
-		t_unsigned_int32 = CL_UNSIGNED_INT32,
-		t_snorm_int8 = CL_SNORM_INT8,
-		t_snorm_int16 = CL_SNORM_INT16,
-		t_unorm_int8 = CL_UNORM_INT8,
-		t_unorm_int16 = CL_UNORM_INT16,
+		t_float           = CL_FLOAT,
+		t_half_float      = CL_HALF_FLOAT,
+		t_signed_int8     = CL_SIGNED_INT8,
+		t_signed_int16    = CL_SIGNED_INT16,
+		t_signed_int32    = CL_SIGNED_INT32,
+		t_unsigned_int8   = CL_UNSIGNED_INT8,
+		t_unsigned_int16  = CL_UNSIGNED_INT16,
+		t_unsigned_int32  = CL_UNSIGNED_INT32,
+		t_snorm_int8      = CL_SNORM_INT8,
+		t_snorm_int16     = CL_SNORM_INT16,
+		t_unorm_int8      = CL_UNORM_INT8,
+		t_unorm_int16     = CL_UNORM_INT16,
 		t_unorm_int101010 = CL_UNORM_INT_101010,
 		t_unorm_short_555 = CL_UNORM_SHORT_555,
 		t_unorm_short_565 = CL_UNORM_SHORT_565
 	};
 
 	enum class CommandType : cl_command_type {
-		acquire_gl_objects = CL_COMMAND_ACQUIRE_GL_OBJECTS,
-		copy_buffer = CL_COMMAND_COPY_BUFFER,
+#if defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		read_buffer_rect           = CL_COMMAND_READ_BUFFER_RECT,
+		write_buffer_rect          = CL_COMMAND_WRITE_BUFFER_RECT,
+		copy_buffer_rect           = CL_COMMAND_COPY_BUFFER_RECT,
+		user                       = CL_COMMAND_USER,
+		barrier                    = CL_COMMAND_BARRIER,
+		migrate_memory_objects     = CL_COMMAND_MIGRATE_MEM_OBJECTS,
+		fill_buffer                = CL_COMMAND_FILL_BUFFER,
+		fill_image                 = CL_COMMAND_FILL_IMAGE,
+#if defined(CPPCL_D3D10_SHARING)
+		acquire_d3d10_objects      = CL_COMMAND_ACQUIRE_D3D10_OBJECTS_KHR,
+		release_d3d10_objects      = CL_COMMAND_RELEASE_D3D10_OBJECTS_KHR,
+#endif
+#if defined(CPPCL_D3D11_SHARING)
+		acquire_d3d11_objects      = CL_COMMAND_ACQUIRE_D3D11_OBJECTS_KHR,
+		release_d3d10_objects      = CL_COMMAND_RELEASE_D3D11_OBJECTS_KHR,
+#endif
+#if defined(CPPCL_DX9_MEDIA_SHARING)
+		acquire_dx9_media_surfaces = CL_COMMAND_ACQUIRE_DX9_MEDIA_SURFACES_KHR,
+		release_dx9_media_surfaces = CL_COMMAND_RELEASE_DX9_MEDIA_SURFACES_KHR,
+#endif
+#endif // defined(CPPCL_CL_VERSION_1_2_ENABLED)
+		acquire_gl_objects   = CL_COMMAND_ACQUIRE_GL_OBJECTS,
+		copy_buffer          = CL_COMMAND_COPY_BUFFER,
 		copy_buffer_to_image = CL_COMMAND_COPY_BUFFER_TO_IMAGE,
-		copy_image = CL_COMMAND_COPY_IMAGE,
+		copy_image           = CL_COMMAND_COPY_IMAGE,
 		copy_image_to_buffer = CL_COMMAND_COPY_IMAGE_TO_BUFFER,
-		map_buffer = CL_COMMAND_MAP_BUFFER,
-		map_image = CL_COMMAND_MAP_IMAGE,
-		marker = CL_COMMAND_MARKER,
-		native_kernel = CL_COMMAND_NATIVE_KERNEL,
-		nd_range_kernel = CL_COMMAND_NDRANGE_KERNEL,
-		read_buffer = CL_COMMAND_READ_BUFFER,
-		read_image = CL_COMMAND_READ_IMAGE,
-		release_gl_objects = CL_COMMAND_RELEASE_GL_OBJECTS,
-		task = CL_COMMAND_TASK,
-		unmap_mem_object = CL_COMMAND_UNMAP_MEM_OBJECT,
-		write_buffer = CL_COMMAND_WRITE_BUFFER,
-		write_image = CL_COMMAND_WRITE_IMAGE
+		map_buffer           = CL_COMMAND_MAP_BUFFER,
+		map_image            = CL_COMMAND_MAP_IMAGE,
+		marker               = CL_COMMAND_MARKER,
+		native_kernel        = CL_COMMAND_NATIVE_KERNEL,
+		nd_range_kernel      = CL_COMMAND_NDRANGE_KERNEL,
+		read_buffer          = CL_COMMAND_READ_BUFFER,
+		read_image           = CL_COMMAND_READ_IMAGE,
+		release_gl_objects   = CL_COMMAND_RELEASE_GL_OBJECTS,
+		task                 = CL_COMMAND_TASK,
+		unmap_mem_object     = CL_COMMAND_UNMAP_MEM_OBJECT,
+		write_buffer         = CL_COMMAND_WRITE_BUFFER,
+		write_image          = CL_COMMAND_WRITE_IMAGE
 	};
 
 	// cl_d3d10_device_set_khr - not implemented yet by intel sdk

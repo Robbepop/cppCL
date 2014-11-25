@@ -1,5 +1,5 @@
-#ifndef __CL_COMMON_HEADER
-#define __CL_COMMON_HEADER
+#ifndef CPPCL_COMMON_HEADER
+#define CPPCL_COMMON_HEADER
 
 #include "wrapper.hpp"
 

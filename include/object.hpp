@@ -1,5 +1,5 @@
-#ifndef __CL_OBJECT_HEADER
-#define __CL_OBJECT_HEADER
+#ifndef CPPCL_OBJECT_HEADER
+#define CPPCL_OBJECT_HEADER
 
 #include "wrapper.hpp"
 #include "error_handler.hpp"
@@ -33,6 +33,8 @@ namespace cl {
 			return m_id;
 		}
 	protected:
+		Object<ObjectInfo>() {}
+
 		Object<ObjectInfo>(typename ObjectInfo::cl_type id) :
 			m_id{id}
 		{}

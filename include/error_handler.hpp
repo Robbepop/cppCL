@@ -1,5 +1,5 @@
-#ifndef __CL_ERROR_HANDLER_HEADER
-#define __CL_ERROR_HANDLER_HEADER
+#ifndef CPPCL_ERROR_HANDLER_HEADER
+#define CPPCL_ERROR_HANDLER_HEADER
 
 #include "wrapper.hpp"
 #include "exception.hpp"

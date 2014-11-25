@@ -1,5 +1,5 @@
-#ifndef CL_MAP_BUFFER_FLAGS_HEADER
-#define CL_MAP_BUFFER_FLAGS_HEADER
+#ifndef CPPCL_MAP_BUFFER_FLAGS_HEADER
+#define CPPCL_MAP_BUFFER_FLAGS_HEADER
 
 #include "wrapper.hpp"
 #include "event.hpp"

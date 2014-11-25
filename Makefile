@@ -72,8 +72,8 @@ $(DIR_BUILD)/%.o: $(DIR_SRC)/%.$(EXT_SRC)
 #######################################
 # Tests
 #######################################
-#tester:
-#	$(CC) $(CFLAGS) $(DIR_TEST)/tester.$(EXT_SRC) $(PATH_INC) $(PATH_LIB) -o $(DIR_BIN)/tester
+#test_01:
+#	$(CC) $(CFLAGS) $(DIR_TEST)/test.$(EXT_SRC) $(PATH_INC) $(PATH_LIB) -o $(DIR_BIN)/test
 
 #######################################
 # Clean

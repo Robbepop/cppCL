@@ -1,5 +1,5 @@
-#ifndef __CL_DEVICE_HEADER
-#define __CL_DEVICE_HEADER
+#ifndef CPPCL_DEVICE_HEADER
+#define CPPCL_DEVICE_HEADER
 
 #include "object.hpp"
 #include "error_handler.hpp"

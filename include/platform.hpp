@@ -1,5 +1,5 @@
-#ifndef __CL_PLATFORM_HEADER
-#define __CL_PLATFORM_HEADER
+#ifndef CPPCL_PLATFORM_HEADER
+#define CPPCL_PLATFORM_HEADER
 
 #include "object.hpp"
 

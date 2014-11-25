@@ -1,5 +1,5 @@
-#ifndef __CL_EXCEPTION_HEADER
-#define __CL_EXCEPTION_HEADER
+#ifndef CPPCL_EXCEPTION_HEADER
+#define CPPCL_EXCEPTION_HEADER
 
 #include "wrapper.hpp"
 

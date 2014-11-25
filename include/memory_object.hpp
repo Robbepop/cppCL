@@ -1,5 +1,5 @@
-#ifndef __CL_MEMORY_OBJECT_HEADER
-#define __CL_MEMORY_OBJECT_HEADER
+#ifndef CPPCL_MEMORY_OBJECT_HEADER
+#define CPPCL_MEMORY_OBJECT_HEADER
 
 #include "wrapper.hpp"
 #include "object.hpp"

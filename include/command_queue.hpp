@@ -1,5 +1,5 @@
-#ifndef __CL_COMMAND_QUEUE_HEADER
-#define __CL_COMMAND_QUEUE_HEADER
+#ifndef CPPCL_COMMAND_QUEUE_HEADER
+#define CPPCL_COMMAND_QUEUE_HEADER
 
 #include "object.hpp"
 #include "error_handler.hpp"
@@ -1204,7 +1204,7 @@ clSetMemObjectDestructorCallback (MemoryObject) (OpenCL 1.1)
 TODO: all image enqueue functions
 clEnqueueReadImage
 clEnqueueWriteImage
-clEnqueueFillImage
+clEnqueueFillImage (OpenCL v1.2)
 clEnqueueCopyImage
 clEnqueueMapImage
 

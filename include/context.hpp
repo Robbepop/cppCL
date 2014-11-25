@@ -1,5 +1,5 @@
-#ifndef __CL_CONTEXT_HEADER
-#define __CL_CONTEXT_HEADER
+#ifndef CPPCL_CONTEXT_HEADER
+#define CPPCL_CONTEXT_HEADER
 
 #include "object.hpp"
 #include "device.hpp"
@@ -54,7 +54,7 @@ namespace cl {
 			Function callback,
 			T&& user_data
 		) :
-			Object{0}
+			Object{}
 		{
 			/*
 			static const auto error_lambda = [](ErrorCode error_code) -> std::experimental::string_view {

@@ -1,5 +1,5 @@
-#ifndef __CL_CONTEXT_PROPERTIES_HEADER
-#define __CL_CONTEXT_PROPERTIES_HEADER
+#ifndef CPPCL_CONTEXT_PROPERTIES_HEADER
+#define CPPCL_CONTEXT_PROPERTIES_HEADER
 
 #include "wrapper.hpp"
 #include "platform.hpp"

@@ -1,5 +1,5 @@
-#ifndef __CL_IMAGE_HEADER
-#define __CL_IMAGE_HEADER
+#ifndef CPPCL_IMAGE_HEADER
+#define CPPCL_IMAGE_HEADER
 
 #include "memory_object.hpp"
 

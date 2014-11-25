@@ -1,5 +1,5 @@
-#ifndef __CL_FP_CONFIG_HEADER
-#define __CL_FP_CONFIG_HEADER
+#ifndef CPPCL_FP_CONFIG_HEADER
+#define CPPCL_FP_CONFIG_HEADER
 
 #include "wrapper.hpp"
 

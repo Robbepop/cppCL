@@ -1,5 +1,5 @@
-#ifndef __CL_MAPPED_BUFFER_HEADER
-#define __CL_MAPPED_BUFFER_HEADER
+#ifndef CPPCL_MAPPED_BUFFER_HEADER
+#define CPPCL_MAPPED_BUFFER_HEADER
 
 #include "command_queue.hpp"
 #include "memory_object.hpp"

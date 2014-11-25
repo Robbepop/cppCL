@@ -11,7 +11,7 @@ namespace cl {
 	{}
 
 	CommandQueue::CommandQueue(Context const& context, Device const& device, CommandQueueProperties const& properties) :
-		Object{0}
+		Object{}
 	{
 		static const auto error_map = error::ErrorMap{
 			{ErrorCode::invalid_context, "the given context is invalid."},

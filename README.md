@@ -1,3 +1,5 @@
+OBSOLETE! For a better approach, visit https://github.com/Robbepop/clpp !
+
 Welcome to cppCL (C++ OpenCL)
 =============================
 
